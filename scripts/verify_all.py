@@ -95,7 +95,13 @@ def core_regressions() -> None:
 
 
 def writeback_idempotency() -> bool:
-    """If GMS is up, verify re-running an audit does not duplicate assertion/incident entities."""
+    """If GMS is up, verify re-running an audit does not duplicate assertion/incident entities.
+
+    Uses a throwaway 'verify_idem' fixture dataset — not a demo asset — and tears it down
+    (hard-delete) in a `finally` block so repeated `verify_all.py` runs never leave it visible
+    in the DataHub catalog. Idempotency is proven WITHIN the run (3 writes -> 1 entity each)
+    before teardown; the assertion below inspects that in-run state, not anything left behind.
+    """
     from trust_layer.config import CONFIG
 
     try:
@@ -113,21 +119,30 @@ def writeback_idempotency() -> bool:
 
     c = DataHubClient()
     urn = "urn:li:dataset:(urn:li:dataPlatform:sqlite,verify_idem,PROD)"
-    ag = TrustLayerAgent(client=c, write_back=True)
-    f = Finding("temporal_leakage", Severity.FAIL, "x",
-                suggested_tags=["audit-failed"], suggested_incident=True)
-    for _ in range(3):
-        r = AuditReport(target=urn, findings=[f]); r.compute_verdict(); ag._write_back(urn, r)
-    time.sleep(2)
 
     def det(k):
         return hashlib.sha1(f"{k}|{urn}|temporal_leakage".encode()).hexdigest()
 
     au, iu = str(AssertionUrn(det("assertion"))), str(IncidentUrn(det("incident")))
-    ok = c._graph.exists(au) and c._graph.exists(iu)
-    print("[R3] write-back idempotency (3 runs → 1 assertion + 1 incident entity)")
-    check("deterministic entities exist, no duplicates", ok)
-    return ok
+    try:
+        ag = TrustLayerAgent(client=c, write_back=True)
+        f = Finding("temporal_leakage", Severity.FAIL, "x",
+                    suggested_tags=["audit-failed"], suggested_incident=True)
+        for _ in range(3):
+            r = AuditReport(target=urn, findings=[f]); r.compute_verdict(); ag._write_back(urn, r)
+        time.sleep(2)
+
+        ok = c._graph.exists(au) and c._graph.exists(iu)
+        print("[R3] write-back idempotency (3 runs → 1 assertion + 1 incident entity)")
+        check("deterministic entities exist, no duplicates", ok)
+        return ok
+    finally:
+        # teardown: this is a test fixture, not a demo dataset — never leave it in the catalog
+        for e in (urn, au, iu):
+            try:
+                c._graph.hard_delete_entity(e)
+            except Exception:
+                pass
 
 
 def main() -> int:

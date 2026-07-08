@@ -25,14 +25,19 @@ def main() -> int:
     svg = FAVICON.read_bytes()
     data_uri = "data:image/svg+xml;base64," + base64.b64encode(svg).decode()
     g = DataHubGraph(DataHubGraphConfig(server=CONFIG.gms_url, token=CONFIG.gms_token))
+    # `title` renders directly under the name in the profile header's fixed-height purple band.
+    # A long title wraps and gets clipped there; an EMPTY title renders as a literal "None"
+    # placeholder (worse). Keep it short and non-empty — one word that always fits on one line.
+    # The longer description belongs ONLY in aboutMe (the editable bio field, shown lower on the
+    # page where it has room to wrap).
     g.emit_mcp(MCP(entityUrn=ACTOR, aspect=S.CorpUserInfoClass(
-        active=True, displayName="Legibright Trust Auditor", system=True,
-        title="Statistical Trust Layer agent")))
+        active=True, displayName="Legibright Trust Auditor", system=True, title="Auditor")))
     g.emit_mcp(MCP(entityUrn=ACTOR, aspect=S.CorpUserEditableInfoClass(
         displayName="Legibright Trust Auditor",
-        title="Statistical Trust Layer agent",
-        aboutMe="Audits metrics/models for leakage, overfit and calibration; writes verdicts "
-                "back as assertions, incidents, tags and a 0-100 Trust Score.",
+        title="Auditor",
+        aboutMe="Statistical Trust Layer agent — audits models for leakage, overfit and "
+                "calibration; writes verdicts back as assertions, incidents, tags and a "
+                "0-100 Trust Score.",
         pictureLink=data_uri)))
     back = g.get_aspect(ACTOR, S.CorpUserEditableInfoClass)
     ok = bool(back and back.pictureLink)
