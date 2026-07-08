@@ -32,11 +32,11 @@ Assertion/Incident/Tag entities, plus a typed 0-100 **Trust Score** structured p
 ## Two layers
 
 - **Auditor (the metric)** — decides if a reported metric is trustworthy:
-  - *temporal leakage*: reads the train/test split SQL from query history and classifies it —
+  - _temporal leakage_: reads the train/test split SQL from query history and classifies it —
     TEMPORAL (clean) vs RANDOM / hash / TABLESAMPLE (future leaks into training).
-  - *overfit flags*: in-sample≫holdout gap, near-perfect in-sample (memorization),
+  - _overfit flags_: in-sample≫holdout gap, near-perfect in-sample (memorization),
     multiple-testing luck, implausible absolute ROI.
-  - *calibration bias*: favorite-longshot / probability miscalibration a single score hides.
+  - _calibration bias_: favorite-longshot / probability miscalibration a single score hides.
 - **Sentinel (the source)** — catches data-health problems that poison a metric, EXTENDING
   DataHub's profiling: silent staleness (values frozen while writes continue), PSI/KS
   distribution drift, null-rate spikes, breaking schema drift.
@@ -44,20 +44,24 @@ Assertion/Incident/Tag entities, plus a typed 0-100 **Trust Score** structured p
 Verdict is one of 🟢 TRUSTWORTHY · 🟡 INCONCLUSIVE · 🔴 NOT TRUSTWORTHY.
 
 ## Multi-Agent Compatibility
+
 Works across Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf and other Agent-Skills
 tools. The engine is an MCP server (`trust_layer.mcp_server`) plus a `trust-layer` CLI, so any
 agent can drive it. All statistical checks are pure and run without cloud DataHub.
 
 ## Setup (once)
+
 ```bash
 pip install statistical-trust-layer            # or: pip install -e . from the repo
 # point it at your DataHub (OSS quickstart or Cloud):
 export DATAHUB_GMS_URL=http://localhost:8080
 export DATAHUB_GMS_TOKEN=<personal access token>   # blank for a fresh local quickstart
 ```
+
 Register the MCP server so this agent can call it (see `references/mcp-tools.md`).
 
 ## Workflow — auditing a metric/dataset
+
 1. **Identify the target.** Get the dataset URN the metric is built on (ask, or `datahub search`).
 2. **Read how it was built.** Call the MCP tool `audit_dataset(dataset_urn)` — it fetches the
    split SQL from DataHub query history, classifies the methodology, and runs the checks.
@@ -72,6 +76,7 @@ Register the MCP server so this agent can call it (see `references/mcp-tools.md`
    a random split, not walk-forward") and propose the fix (a time-ordered split).
 
 ## Judgment rules
+
 - A moderate train/test gap is NOT overfit if the model still generalizes — do not cry wolf.
   Overfit means near-perfect in-sample memorization or a collapsed holdout.
 - A random/hash split on time-ordered data is leakage even if no timestamps are compared —
