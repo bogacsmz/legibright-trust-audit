@@ -1,72 +1,63 @@
 <p align="center"><img src="../docs/assets/legibright-lockup.svg" width="300" alt="Legibright"/></p>
 
-# Demo script — Legibright (≤ 3:00)
+# Demo script — Legibright (final read-aloud version, ≤ 3:00)
 
-Every number below is produced live by `bash demo/run_demo.sh` (idempotent — take 1/2/3 match).
-Each beat has **ON-SCREEN** text (for the muted juror) and **VO** (voiceover). Times are targets;
-aim to land the close by 2:55. Brand: indigo `#1E1B4B`/`#4F46E5`, ✓-L logo, verdict colors stay
-semantic (🟢🟡🔴). Watermark `legibright-mark.svg` bottom-right throughout.
+**Reading speed:** ~130 words per minute (slow and clear). Pause 1–2 seconds between scenes —
+let the last card or number sit on screen before you speak again.
+**Total voiceover: ~325 words** (~2:30 of speech), leaving room for pauses and screen time to land
+under 3:00.
+
+**Pronunciation help (say these slowly):**
+- **Legibright** → "LEJ-ih-bright" (like "legible" + "bright")
+- **DataHub** → "DAY-ta-hub"
+- **MCP** → say the letters: "M... C... P"
+- **99.8 percent** → say it in three small pieces: "ninety-nine ~ point eight ~ percent"
+
+Every number below is produced live by `bash demo/run_demo.sh` — it's the same on every take.
+Verdict colors stay as-is on screen (🟢🟡🔴); title/transition cards are indigo `#1E1B4B` with the
+✓-L logo (`demo/cards/*.png`, ready to drop into your editor).
 
 ---
 
-### 0:00–0:18 · HOOK — the meta-position  *(title card → face/screen)*
-**ON-SCREEN:** `AI agents now write the SQL, build the pipeline, train the model.` → `But is the model they ship trustworthy — or an overfit lie that looks great on paper?` → `Who audits that? → Nobody.` → **Legibright.** → *Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.*
-**VO:** "AI agents already write SQL, build pipelines, train models. But the model they hand you — is it trustworthy, or an overfit lie that looks perfect on paper? Who checks? Nobody does. That's Legibright."
-*Note: this is the wedge — everyone else at this hackathon is text-to-SQL. We audit the honesty of the result.*
+## Scene 1 — Hook (0:00–0:15)
+[SCREEN: Title card — `demo/cards/title-open.png`]
+[ON-SCREEN TEXT: "Who checks if an AI's model is trustworthy? Nobody. Until now."]
+[VOICEOVER: "AI agents can write code, build pipelines, and train models. But is the model any good? Or does it just look good on paper? Right now, nobody checks. Legibright checks. And it starts by checking itself."]
 
-### 0:18–1:25 · LIVE CATCH — the aha  *(terminal running `demo_writeback.py`, DataHub UI in a second tab)*
-**ON-SCREEN (as the card prints):**
-- `Dataset: main.matches — 11,849 real football matches (public, reproducible)`
-- `A model that looks like a massive winner: +40% ROI in backtest  ✅ ship it?`
-- `Legibright audits →`
-- `❌ TEMPORAL LEAKAGE — 99.8% of training rows are dated after the test window opens: a random split leaked the future`
-- `❌ OVERFIT — +40% in-sample vs −12% holdout (gap 0.52); 677 combos scanned → ~16 false winners by chance`
-- `✅ CALIBRATION — ECE 1.9% (below the 3% material floor): genuinely fine, so Legibright does NOT flag it`
-- `🔴 NOT TRUSTWORTHY · Trust Score 28/100`
-- `→ DataHub: incident (ACTIVE) · tags · Trust Score property · deprecation PROPOSED`
+## Scene 2 — The Catch (0:15–1:00)
+[SCREEN: Terminal running `demo/run_demo.sh`, Beat 1 (`demo_writeback.py`) — let the verdict card print live, then cut to the DataHub UI on `main.matches` (Incidents + Quality tabs)]
+[ON-SCREEN TEXT: "11,849 real matches. Claim: +40% profit. 99.8% of the training data is from AFTER the test period. Trust Score: 28/100."]
+[VOICEOVER: "Here is real data: almost twelve thousand football matches. A model claims plus-forty-percent profit. Looks like a big win. Legibright checks it. It finds that ninety-nine ~ point eight ~ percent of the training data came from AFTER the test period. That is not a fair test. The model saw the future. Legibright gives it a Trust Score: twenty-eight out of one hundred. Not trustworthy. And it writes this straight into DataHub: an incident, a tag, the score, and a note saying 'maybe remove this dataset.'"]
 
-**VO:** "Here's a dataset in DataHub and a model that looks like a massive winner — plus-forty-percent ROI in backtest. Every generic agent says ship it. Legibright audits the honesty. From the real match dates it measures that ninety-nine-point-eight percent of the training rows are dated *after* the test window opens — a random split leaked the future. It flags the overfit signature — plus forty in-sample, minus twelve on holdout. But calibration? That's genuinely fine — error under two percent — so Legibright passes it. It doesn't cry wolf. Verdict: not trustworthy, Trust Score twenty-eight. And it doesn't just print that — it writes an incident, tags, a typed Trust Score, and even *proposes* deprecation, back into DataHub." *(cut to UI: red incident + Trust Score 28 on the asset)*
-*This is the closed loop: detect → write back → propose a fix.*
+## Scene 3 — Trust, Not Accuracy (1:00–1:35)
+[SCREEN: Transition card `demo/cards/transition-trust-accuracy.png` (1–2 sec), then terminal Beat 2 (`generality_check.py`) showing Bike Sharing pass, then Titanic fail]
+[ON-SCREEN TEXT: "Bike demand model: only 57% accurate. But HONEST. Trust Score: 100/100."]
+[VOICEOVER: "Now watch this. Same tool, an honest model this time: predicting bike demand. It is only fifty-seven percent accurate. Not amazing. But it is HONESTLY fifty-seven percent — clean data, no cheating. Trust Score: one hundred out of one hundred. Legibright does not score accuracy. It scores honesty. A high number built on a lie fails. A small number built the right way passes. And a leaky model, Titanic survival, gets caught again."]
 
-### 1:25–1:55 · NO WOLF-CRYING · trust ≠ accuracy — the moat  *(terminal `generality_check.py`)*
-**ON-SCREEN:**
-- `Same auditor, an HONEST model (Bike Sharing, clean walk-forward): R² 0.57 on held-out data`
-- `🟢 TRUSTWORTHY · Trust Score 100/100   (band: TRUSTWORTHY 71–100)`
-- `This model is only ~57% accurate — but honestly 57%.`
-- `Legibright scores HONESTY, not accuracy.`
-- `A leaky model (Titanic): 🔴 NOT TRUSTWORTHY — caught. Public data, unrelated to betting.`
+## Scene 4 — Real DataHub, Any Agent (1:35–2:00)
+[SCREEN: Quick look at `skills/datahub-trust-audit/SKILL.md`, then cut back to the DataHub UI Quality tab (3 FAIL assertions) and the Trust Score property]
+[ON-SCREEN TEXT: "Any agent can call this over MCP. Installs as a DataHub Skill. Writes real data back."]
+[VOICEOVER: "This is not just a demo script. Any AI agent can call Legibright, using something called MCP. It installs as a new DataHub Skill, next to the five official ones. It builds ON TOP of DataHub — it does not replace it. It writes real data back: an assertion, an incident, a tag, a score."]
 
-**VO:** "A tool that flags everything red is useless. Same auditor, a genuinely honest model — a bike-demand forecast that's only about fifty-seven percent accurate. But it's *honestly* fifty-seven percent: clean time-split, no overfit. Trust Score — a hundred. Because Legibright scores honesty, not accuracy. A high number built on leakage fails; a modest number built honestly passes. The leaky Titanic model? Caught. Public datasets, nothing to do with betting — it discriminates."
+## Scene 5 — Mic Drop (2:00–2:35)
+[SCREEN: Transition card `demo/cards/transition-self-audit.png` (1–2 sec), then terminal Beat 3 (`pytest` + `verify_all.py`) showing "53 passed" and "16 passed, 0 failed"]
+[ON-SCREEN TEXT: "15 real bugs found in OUR OWN code. All fixed. 53 tests, all green. Run it yourself."]
+[VOICEOVER: "One more thing. A tool that checks other people's honesty must be honest about itself. So we brought in a second AI agent — just to try to break this one. Three rounds of attacks. We found fifteen real bugs, in our OWN code. We fixed every one. Nothing was hidden. Fifty-three tests, all green. Do not trust me — run it yourself."]
 
-### 1:55–2:25 · REAL DataHub + ANY AGENT  *(show MCP call / SKILL.md / the graph)*
-**ON-SCREEN:**
-- `Exposed as an MCP tool → any agent can call audit_dataset(urn)`
-- `Installs as the 6th DataHub Skill (setup·search·lineage·enrich·quality· + trust-audit)`
-- `Writes native entities: Assertion · Incident · Tag · Structured Property`
-- `Extends the Data Quality Agent pattern — not a rewrite.`
-
-**VO:** "This isn't a toy script. It's an MCP tool any agent can call, and it installs as a sixth DataHub Skill next to the official five. It's built on DataHub's MCP Server and Skills and extends the canonical Data Quality Agent pattern — adding the statistical-honesty layer DataHub doesn't ship. We compose search and quality; we don't rebuild them."
-
-### 2:25–2:52 · MIC-DROP — it survives its own audit  *(terminal `verify_all.py`)*
-**ON-SCREEN:**
-- `A tool that audits others' honesty must survive the same cruelty.`
-- `3-round adversarial self-audit — a separate agent tried to break it.`
-- `Nothing loosened to pass. 15 real flaws found + fixed · 6 honest limits documented.`
-- `53/53 tests · verify_all 16/16 · run it yourself.`
-
-**VO:** "A tool that judges other people's honesty has to survive the same cruelty. So a separate agent spent three rounds trying to break this one — and nothing was ever loosened to go green. Fifteen real flaws found and fixed — including three I caught while building and re-verifying this very demo — six honest limits documented in the open. Fifty-three tests, sixteen adversarial checks. Don't trust me — run verify_all yourself."
-
-### 2:52–3:00 · CLOSE  *(close card)*
-**ON-SCREEN:** ✓-L logo · **Legibright — make model trust legible.** · `github.com/bogacsmz/legibright-trust-audit`
-**VO:** "Legibright. Make model trust legible."
+## Scene 6 — Close (2:35–2:48)
+[SCREEN: Closing card — `demo/cards/title-close.png`]
+[ON-SCREEN TEXT: "Legibright — make model trust legible. github.com/bogacsmz/legibright-trust-audit"]
+[VOICEOVER: "Legibright. Make model trust legible. Thank you."]
 
 ---
 
 ## Recording notes
-- Pre-open two tabs: terminal + DataHub UI on `main.matches` (Quality & Incidents). Run `run_demo.sh`
-  once before recording so data/avatar are warm; the second run is your take.
+- Run `bash demo/reset_demo.sh` right before you record (and before each retake) — it wipes and
+  rebuilds the DataHub catalog to the exact clean demo state (matches 28, titanic 25, bikeshare
+  100), so every take starts identical.
 - `DEMO_PAUSE=1 bash demo/run_demo.sh` pauses between beats so you can narrate without racing.
-- 3 takes (our discipline mirrors the product's). Target 2:45–2:55 to stay under the 3:00 cap.
-- If the terminal font is small on camera, `export FIGLET=0` — banners already use big indigo bars.
-- Honesty guardrail for narration: say "measured" for leakage/calibration, "reconstructed claim"
-  for the +40%/−12% overfit inputs (we judge a representative claim; we don't fabricate a fit).
+- 3 takes is our own discipline — record 3, pick the cleanest.
+- Honesty guardrail for narration: say "checks" or "finds," not "proves." Say "reconstructed
+  claim" in your head for the +40%/−12% numbers if asked — Legibright judges a representative
+  claim on real match dates, it doesn't fabricate a backtest.
+- Full step-by-step walkthrough (what to click, how long to hold each screen): `demo/RECORDING_GUIDE.md`.

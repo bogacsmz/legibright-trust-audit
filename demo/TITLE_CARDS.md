@@ -1,7 +1,18 @@
 # Legibright — title-card & thumbnail specs
 
-Ready-made SVGs are in `demo/cards/` (`title-open.svg`, `title-close.svg`, `thumbnail.svg`). They're
-starting points — refine in your video editor. Below is the spec so anything you rebuild stays on-brand.
+`demo/cards/` has both the SVG source and a **rendered PNG** for each card, at final resolution,
+ready to drop straight into a video editor or the Devpost thumbnail upload — no conversion needed:
+
+| File | Size | Use |
+|---|---|---|
+| `title-open.png` | 1920×1080 | opening card (Scene 1) |
+| `title-close.png` | 1920×1080 | closing card (Scene 6) |
+| `transition-trust-accuracy.png` | 1920×1080 | 1–2 sec transition into Scene 3 |
+| `transition-self-audit.png` | 1920×1080 | 1–2 sec transition into Scene 5 |
+| `thumbnail.png` | 1280×720 | Devpost gallery thumbnail |
+
+Regenerate any of them from the `.svg` source with `rsvg-convert -w <width> -h <height> in.svg -o out.png`
+(installed via `brew install librsvg`). Below is the spec so anything you rebuild stays on-brand.
 
 ## Palette (locked)
 | Token | Hex | Where |
@@ -34,13 +45,19 @@ DataHub." · one proof line "🔴 NOT TRUSTWORTHY · Trust Score 28/100 · writt
 Export PNG at 1280×720 (Devpost gallery ratio). Text must survive being scaled to a small card — keep
 it to three lines.
 
-## 4 · Beat lower-thirds (in-editor, not pre-rendered)
-For each beat's ON-SCREEN lines (see `SCRIPT.md`): a semi-transparent ink bar (`#1E1B4B` @ 82%) across
+## 4 · Transition cards — 1920×1080 (`transition-trust-accuracy.svg`, `transition-self-audit.svg`)
+Same ink background + small ✓-L mark, no wordmark (mid-video, not the open/close). One big white
+headline (~90–104 px) + one lavender `#C7D2FE` subtitle (~38–42 px). Hold 1–2 seconds — these are
+quick beat-markers between live-screen segments, not full title cards.
+
+## 5 · Beat lower-thirds (in-editor, not pre-rendered)
+For each beat's ON-SCREEN TEXT (see `SCRIPT.md`): a semi-transparent ink bar (`#1E1B4B` @ 82%) across
 the lower third, text in white/`#C7D2FE`, ~34–40 px. Keep the terminal readable above it.
 
-## 5 · Watermark (all live-screen beats)
+## 6 · Watermark (all live-screen beats)
 `legibright-mark.svg` bottom-right, ~44 px, ~55% opacity, 24 px margin. Never over the verdict card.
 
 ## Export
-SVG → PNG at 2× for crisp video (`title-open` → 3840×2160, downscale on the timeline). If your editor
-can't read SVG, open in a browser at the target size and screenshot, or use `rsvg-convert -w 1920`.
+PNGs in `demo/cards/` are already rendered at final resolution. To regenerate after editing an SVG:
+`rsvg-convert -w 1920 -h 1080 demo/cards/title-open.svg -o demo/cards/title-open.png` (thumbnail is
+1280×720). For 2× crispness on a 4K timeline, render at double the target (e.g. `-w 3840 -h 2160`).
