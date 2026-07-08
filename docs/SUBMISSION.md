@@ -89,6 +89,16 @@ need (TruEra→Snowflake, Robust Intelligence→Cisco, 2024); Legibright puts it
 the thing DataHub doesn't do — write the verdict back into the graph, and prove it by surviving our
 own 3-round adversarial audit (14 bugs found in ourselves, fixed).**
 
+## Open-source contributions (contribute back)
+Two prepared PRs — clickable "contribute back" evidence (the rules count RFCs, docs, and skills):
+1. **New skill** → `datahub-project/datahub-skills`: the `datahub-trust-audit` skill, conforming to the
+   repo template so it installs beside the official five. **PR:** _(link added on open — see [`contrib/`](../contrib/))_
+2. **Docs fix** → `datahub-project/datahub`: a SQLite-profiling caveat (`max_overflow`/`NullPool`) we hit
+   firsthand while ingesting demo data. **PR:** _(link added on open — see [`contrib/`](../contrib/))_
+
+Prepared PR bodies + exact fork/push/open steps are in [`contrib/`](../contrib/); plus an RFC for
+statistical-honesty assertions in [`docs/upstream/`](upstream/).
+
 ## Try it in 60 seconds
 ```bash
 git clone https://github.com/bogacsmz/legibright-trust-audit && cd legibright-trust-audit
