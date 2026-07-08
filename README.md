@@ -1,4 +1,4 @@
-# Honest Metrics Auditor — a DataHub agent that tells you whether to trust a model
+# Statistical Trust Layer — a DataHub agent that tells you whether to trust a model
 
 > **Build with DataHub: The Agent Hackathon** · Challenge: *Agents That Do Real Work* · Apache-2.0
 > Deadline 10 Aug 2026.

@@ -1,5 +1,8 @@
 # Konsept Varyantları — rubriğe göre puanlanmış 2 seçenek (7 Tem 2026)
 
+> Not (8 Tem): Nihai proje adı **Statistical Trust Layer**; aşağıdaki Varyant B'nin "Honest Metrics Auditor" adı, bugün paketin YILDIZ bileşeni olan **Auditor**'a dönüştü (gövde = Sentinel). Bu doküman seçim geçmişini korur.
+
+
 Ortak zemin: MCP/ACK ile context graph'ı oku → istatistiksel dürüst-validasyon koş →
 bulguları graph'a GERİ YAZ (assertion+incident+tag) → lineage ile kök-neden anlatısı.
 Demo verisi: 250k+ satır gerçek oran+sonuç setimiz (tjk_sib.db + tr_odds.db + iddaa_snap.db
