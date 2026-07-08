@@ -103,8 +103,9 @@ def main() -> int:
     print("Fetching Titanic + UCI Bike Sharing...")
     nt, nb = build_generality()
     print(f"  data/generality.db: titanic={nt}, bikeshare={nb}")
-    print("\nDone. Next: bash scripts/quickstart_up.sh  &&  "
-          "datahub ingest -c ingest/recipes/matches.yml")
+    print("\nDone. Next:")
+    print("  python scripts/verify_all.py     # 15 adversarial checks, no DataHub needed")
+    print("  bash scripts/quickstart_up.sh && bash demo/run_demo.sh   # full graph demo (needs DataHub)")
     return 0
 
 

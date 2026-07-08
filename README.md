@@ -8,7 +8,7 @@
   <i>Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.</i>
 </p>
 <p align="center">
-  🔍 <b>13 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo prep → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
+  🔍 <b>14 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo/UI hardening → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
 </p>
 
 # Statistical Trust Layer — an autonomous DataHub agent that audits whether a model can be trusted
@@ -28,6 +28,23 @@ it opens an **Incident**, stamps **Tags**, writes a 0–100 **Trust Score** prop
 > **Trust ≠ accuracy.** Legibright scores *honesty*, not performance. A bike-demand model that's only
 > ~57% accurate but *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a leaky
 > "+40% ROI winner" earns **28**. It rewards the modest-but-honest number and punishes the impressive lie.
+
+## Judge quickstart — try it in 60 seconds
+Tested end-to-end from a clean clone + fresh venv (Python 3.11–3.13):
+```bash
+git clone https://github.com/bogacsmz/legibright-trust-audit && cd legibright-trust-audit
+python -m venv .venv && source .venv/bin/activate         # clean, optional
+pip install -e '.[dev]'
+python scripts/fetch_data.py     # public data → data/*.db (12,904 matches + Titanic + Bike)
+python scripts/verify_all.py     # 15 adversarial checks — NO DataHub needed → "15 passed"
+```
+That's the honest core, no infra. For the full write-back demo (verdicts land in the graph):
+```bash
+bash scripts/quickstart_up.sh    # starts local DataHub at http://localhost:9002 (first run pulls images)
+bash demo/run_demo.sh            # audits 3 datasets, writes back, and reruns verify → "16 passed"
+```
+`verify_all` prints **15 passed** offline and **16 passed** with DataHub up (the 16th check is
+write-back idempotency). No PYTHONPATH or env fiddling required.
 
 ## Positioning: extend, don't rewrite
 This **extends DataHub's canonical Data Quality Agent pattern**. It composes the official
@@ -149,9 +166,9 @@ evidence, a 41% false-red calibration bias, invisible target/group leakage, non-
 write-back. All fixed and locked as regressions. See **`docs/VERIFICATION.md`** for the full
 tested / fixed / honest-limitations ledger, and run:
 ```bash
-python scripts/verify_all.py     # 16 adversarial regression checks (no DataHub needed for the core)
+python scripts/verify_all.py     # 15 checks stand-alone (no DataHub); 16 with the quickstart up
 ```
 
 ## Status
 M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ · auto-fed + MCP ✅ · Sentinel suite ✅ ·
-OSS skill ✅ · 3-round self-audit ✅ (51 tests + 16 verify_all checks green). See `docs/PLAN.md`.
+OSS skill ✅ · self-audit ✅ (52 tests + verify_all 15 stand-alone / 16 with DataHub, green). See `docs/PLAN.md`.

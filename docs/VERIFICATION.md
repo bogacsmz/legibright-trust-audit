@@ -1,7 +1,7 @@
 # Verification & Honest Limitations
 
-> **13 bugs found in ourselves, and fixed** — 12 across a 3-round adversarial self-audit,
-> plus a 13th caught during demo prep. **No test or check was ever loosened to go green.**
+> **14 bugs found in ourselves, and fixed** — 12 across a 3-round adversarial self-audit,
+> plus 2 caught while hardening the demo/UI. **No test or check was ever loosened to go green.**
 
 This project audits other people's models for honesty, so it must survive the same scrutiny.
 On 8 Jul 2026 we ran a 3-round adversarial self-audit: each round a **separate, clean-context
@@ -10,8 +10,9 @@ fixed findings (builder). A 13th flaw surfaced later, while preparing the demo �
 because hiding a bug you found yourself would defeat the entire point of the tool. Every finding was
 either honestly fixed or is recorded below as a known limitation.
 
-Run `python scripts/verify_all.py` to reproduce the regression checks (no DataHub needed for the
-statistical core; write-back/idempotency checks run if GMS is up).
+Run `python scripts/verify_all.py` to reproduce the regression checks. It runs **16 checks: 15
+stand-alone with no DataHub**, and a 16th (write-back idempotency) when the GMS quickstart is up —
+so you'll see `15 passed` offline and `16 passed` with DataHub running.
 
 ## What was tested
 - **Round 1 (skeptical judge):** clean-room reproduce from README in a fresh venv; install path;
@@ -23,7 +24,7 @@ statistical core; write-back/idempotency checks run if GMS is up).
   broken/huge SQL); idempotency (re-run → duplicate incidents?); DataHub down; 250k-row time/memory;
   partial-write consistency; incident lifecycle.
 
-## Found & fixed — 13 flaws (evidence in git history: c594766, 443fb46, 73ed511, b738c54)
+## Found & fixed — 14 flaws (evidence in git history: c594766, 443fb46, 73ed511, b738c54, c0771f3)
 | # | Finding | Fix |
 |---|---|---|
 | R1 | Clean clone couldn't reproduce: no data, `[sqlalchemy]` extra missing, milestone1 tracebacks | `scripts/fetch_data.py` downloads PUBLIC data (football-data.co.uk + Titanic + Bike); `acryl-datahub[sqlalchemy]` in deps; scripts default to repo-local public DBs |
@@ -39,6 +40,7 @@ statistical core; write-back/idempotency checks run if GMS is up).
 | R3 | `classify_sql` hung super-linearly on JOIN chains (untrusted query-history input) | Guard: skip parse on oversized/≥8-JOIN SQL → keyword-only |
 | R3 | DataHub down → raw ConnectionError traceback; no transactionality on write-back | `require_gms` reachability + friendly message; write-back is best-effort per-artifact with an error summary |
 | Demo-prep | **False green (calibration):** hard-label / non-probabilistic predictions (e.g. an overfit tree's `predict_proba` returning 0/1) make Hosmer-Lemeshow undefined — every bin has E∈{0,ng}, denom=0, χ²=0, p=1 — so a badly-calibrated model (Titanic, ECE 0.254) was stamped "well calibrated". The R2 HL fix had its own blind spot. | Guard on HL validity: if <2 bins contribute to χ² (test degenerate) and observed ECE is material, return **WARN "not certifiable"**, never OK. OK message now leads with ECE, not a bare contradictory p. +3 calibration tests (`test_robustness.py`). |
+| UI-hardening | **Silent-swallow — the exact failure we hunt, in our own code:** the Auditor-owner write threw (the ownership-type aspect was missing required `created`/`lastModified` stamps) but the best-effort `_try` in write-back swallowed the exception — the demo logged success while **nothing was written to the graph**. Caught only by reading the graph back, not trusting the log. | Fixed the aspect; write-back already surfaces a partial-write error summary; **+1 test** (`test_writeback_owner`) asserts the owner lands as a custom *Auditor* type. |
 
 ## Remaining honest limitations (NOT hidden)
 1. **Auto-fed scope.** `audit_dataset_from_datahub` / the MCP `audit_dataset` tool judge the
