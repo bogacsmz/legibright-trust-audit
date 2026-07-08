@@ -33,14 +33,21 @@ def test_overfit_flags_fire_on_too_good():
     assert f.severity is Severity.FAIL
 
 
-def test_calibration_flags_longshot_bias():
+def test_calibration_flags_miscalibration():
     from trust_layer.checks.honest_metrics.calibration_bias import CalibrationBiasCheck
-    # low predicted prob but high realized (longshots over-priced) + favorites under
+    # predicted 0.1 but realizes 0.5, predicted 0.9 but realizes 0.33 → grossly miscalibrated
     predicted = [0.1] * 60 + [0.9] * 60
-    outcomes = [1] * 30 + [0] * 30 + [0] * 40 + [1] * 20  # low bin realizes .5, high bin .33
-    f = CalibrationBiasCheck().run(predicted, outcomes, n_bins=5)
+    outcomes = [1] * 30 + [0] * 30 + [0] * 40 + [1] * 20
+    f = CalibrationBiasCheck().run(predicted, outcomes)
     assert f.severity is Severity.FAIL
-    assert "bias" in f.headline.lower()
+    assert f.metrics["p"] < 0.05          # statistically significant, not a fixed-threshold guess
+
+
+def test_calibration_small_n_does_not_certify():
+    # honest guardrail: under 50 rows we must NOT stamp OK ("well calibrated")
+    from trust_layer.checks.honest_metrics.calibration_bias import CalibrationBiasCheck
+    f = CalibrationBiasCheck().run([0.5] * 40, [0] * 40)
+    assert f.severity is Severity.WARN
 
 
 def test_calibration_ok_when_sharp():

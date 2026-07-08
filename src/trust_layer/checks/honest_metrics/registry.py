@@ -13,7 +13,9 @@ from typing import Callable
 
 from ..base import Finding
 from .calibration_bias import CalibrationBiasCheck
+from .group_leakage import GroupLeakageCheck
 from .overfit_flags import OverfitFlagsCheck
+from .target_leakage import TargetLeakageCheck
 from .temporal_leakage import TemporalLeakageCheck
 
 
@@ -43,10 +45,24 @@ AUDITOR_SKILLS: dict[str, AuditSkill] = {
     ),
     "calibration_bias": AuditSkill(
         id="calibration_bias",
-        title="Calibration / favorite-longshot bias",
+        title="Calibration (Hosmer-Lemeshow, sample-size aware)",
         inputs=("predicted", "outcomes"),
         runner=CalibrationBiasCheck().run,
-        catches="systematic probability miscalibration a single accuracy/ROI number hides",
+        catches="statistically-significant probability miscalibration a single score hides",
+    ),
+    "target_leakage": AuditSkill(
+        id="target_leakage",
+        title="Target leakage (single-feature separation)",
+        inputs=("features", "outcomes"),
+        runner=TargetLeakageCheck().run,
+        catches="a feature that almost perfectly predicts the label (encodes the outcome)",
+    ),
+    "group_leakage": AuditSkill(
+        id="group_leakage",
+        title="Group leakage (entity overlap)",
+        inputs=("train_groups", "test_groups"),
+        runner=GroupLeakageCheck().run,
+        catches="the same entity in train and test — the model memorizes it, not the pattern",
     ),
 }
 

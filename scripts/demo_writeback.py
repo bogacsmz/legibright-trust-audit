@@ -36,8 +36,11 @@ def main() -> int:
     dates, implied, outcomes = _load(CONFIG.odds_db)
     print(f"[demo] audited claim: 'backtest_roi = +40%' on {len(dates)} real matches\n")
 
-    # A RANDOM split (industry-common mistake): sort by a hash, not by time → future leaks.
-    order = sorted(range(len(dates)), key=lambda i: (dates[i].microsecond, i))  # pseudo-random
+    # A RANDOM split (industry-common mistake): shuffle rows, ignoring time → future leaks.
+    import random
+
+    order = list(range(len(dates)))
+    random.Random(42).shuffle(order)          # genuinely random, seeded for reproducibility
     cut = int(len(order) * 0.7)
     train_ts = [dates[i].timestamp() for i in order[:cut]]
     test_ts = [dates[i].timestamp() for i in order[cut:]]

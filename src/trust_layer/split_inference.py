@@ -24,6 +24,15 @@ from sqlglot import exp
 _TIME_HINTS = ("date", "dteday", "day", "time", "ts", "timestamp", "fetched_at",
                "start_ts", "season", "year", "yr", "month", "created")
 _RANDOM_FUNCS = ("rand", "random", "newid", "uuid")
+# hashing / bucketing that yields a pseudo-random split regardless of any cosmetic date filter
+_RANDOM_PATTERNS = (
+    (r"\btablesample\b", "TABLESAMPLE — non-deterministic row sampling"),
+    (r"order\s+by\s+(rand|random|newid|uuid)\s*\(", "ORDER BY RANDOM() — shuffles time order"),
+    (r"\bntile\s*\(", "NTILE bucketing — pseudo-random split"),
+    (r"\b(md5|sha1|sha2|hashbytes|farm_fingerprint)\s*\(", "hash-based bucketing — no time order"),
+    (r"[\w\)]\s*%\s*\d+", "modulo bucketing on a column — pseudo-random split, no time order"),
+    (r"\bmod\s*\(", "MOD() bucketing — pseudo-random split, no time order"),
+)
 
 
 class SplitKind(str, Enum):
@@ -38,45 +47,42 @@ class SplitInfo:
     detail: str
     time_column: str | None = None
     cutoff: str | None = None
+    op: str | None = None          # 'lt' (upper-bounded, train-like) or 'gt' (lower-bounded, test-like)
 
 
 def classify_sql(sql: str) -> SplitInfo:
     sql_l = sql.lower()
 
-    # fast textual signals first (robust even if parsing is partial)
-    if "tablesample" in sql_l:
-        return SplitInfo(SplitKind.RANDOM, "uses TABLESAMPLE — non-deterministic row sampling")
-    if re.search(r"order\s+by\s+(rand|random|newid|uuid)\s*\(", sql_l):
-        return SplitInfo(SplitKind.RANDOM, "ORDER BY RANDOM() — shuffles rows, destroys time order")
-    if re.search(r"\b(mod|abs)\s*\(\s*(hash|md5|farm_fingerprint)", sql_l):
-        return SplitInfo(SplitKind.RANDOM, "hash/mod bucketing — pseudo-random split, no time order")
+    # RANDOM signals win FIRST — a cosmetic always-true date filter must not mask a hash/modulo
+    # split (e.g. `WHERE created > '2000-01-01' AND (id % 10) < 7` is a random split).
+    for pat, why in _RANDOM_PATTERNS:
+        if re.search(pat, sql_l):
+            return SplitInfo(SplitKind.RANDOM, why)
 
     try:
         tree = sqlglot.parse_one(sql)
     except Exception:
-        # parsing failed; fall back to keyword scan
         if any(f"{fn}(" in sql_l for fn in _RANDOM_FUNCS):
             return SplitInfo(SplitKind.RANDOM, "random function present (unparsed SQL)")
         return SplitInfo(SplitKind.UNKNOWN, "could not parse SQL")
 
-    # any random function anywhere?
     for fn in tree.find_all(exp.Anonymous, exp.Func):
         name = (fn.name or getattr(fn, "sql_name", lambda: "")() or "").lower()
         if any(r in name for r in _RANDOM_FUNCS):
             return SplitInfo(SplitKind.RANDOM, f"random function {name}() in split query")
 
-    # look for a time-column inequality in WHERE
+    # time-column inequality in WHERE → temporal; capture direction + cutoff for overlap checks
     where = tree.find(exp.Where)
     if where:
-        for cmp in where.find_all(exp.LT, exp.LTE, exp.GT, exp.GTE):
-            col = cmp.find(exp.Column)
-            lit = cmp.find(exp.Literal)
-            if col is not None and _looks_temporal(col.name):
-                cutoff = lit.this if lit is not None else None
-                return SplitInfo(SplitKind.TEMPORAL, f"temporal predicate on `{col.name}`",
-                                 time_column=col.name, cutoff=cutoff)
+        for op_cls, op in ((exp.LT, "lt"), (exp.LTE, "lt"), (exp.GT, "gt"), (exp.GTE, "gt")):
+            for cmp in where.find_all(op_cls):
+                col = cmp.find(exp.Column)
+                lit = cmp.find(exp.Literal)
+                if col is not None and _looks_temporal(col.name):
+                    cutoff = str(lit.this) if lit is not None else None
+                    return SplitInfo(SplitKind.TEMPORAL, f"temporal predicate on `{col.name}`",
+                                     time_column=col.name, cutoff=cutoff, op=op)
 
-    # order-by a time column with a limit is also a temporal split
     if tree.find(exp.Order):
         for o in tree.find_all(exp.Ordered):
             c = o.find(exp.Column)
@@ -118,6 +124,19 @@ def finding_from_queries(queries: list[str]):
             suggested_incident=True,
         )
     if temporals:
+        # Even "temporal" queries leak if the train (upper-bounded, `< X`) and test
+        # (lower-bounded, `>= Y`) ranges OVERLAP, i.e. Y < X. Verify cutoffs don't overlap.
+        uppers = [i.cutoff for _, i in temporals if i.op == "lt" and i.cutoff]
+        lowers = [i.cutoff for _, i in temporals if i.op == "gt" and i.cutoff]
+        if uppers and lowers and min(lowers) < max(uppers):
+            return Finding(
+                "temporal_leakage", Severity.FAIL,
+                "TEMPORAL LEAKAGE — train and test date ranges OVERLAP",
+                detail=f"train upper-bound < {max(uppers)} overlaps test lower-bound >= {min(lowers)}: "
+                       f"rows in [{min(lowers)}, {max(uppers)}) are in BOTH sets. Not a clean cut.",
+                metrics={"train_cutoff": max(uppers), "test_cutoff": min(lowers)},
+                suggested_tags=["audit-failed", "temporal-leakage"], suggested_incident=True,
+            )
         _, info = temporals[0]
         return Finding(
             "temporal_leakage", Severity.OK,

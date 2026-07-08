@@ -18,6 +18,7 @@ from ..base import Check, Finding, Severity
 
 _NEAR_PERFECT = 0.95
 _MEMORIZING = 0.90
+_COLLAPSE_GAP = 0.25   # a train→holdout drop this large is overfit regardless of level
 
 
 class OverfitFlagsCheck(Check):
@@ -45,9 +46,15 @@ class OverfitFlagsCheck(Check):
                 fail = True
                 flags.append(f"holdout {metric} collapsed to {holdout:.2f}")
 
-        # bounded metric: near-perfect in-sample is the memorization tell
+        # bounded metric: two independent overfit tells
         if bounded and gap is not None and gap > gap_alarm:
-            if in_sample >= _NEAR_PERFECT:
+            if gap > _COLLAPSE_GAP:
+                # a large train→holdout collapse is overfit at ANY in-sample level
+                # (catches 0.93→0.40 and 0.95→0.10, not just near-perfect memorization)
+                fail = True
+                flags.append(f"holdout collapse: {metric} {in_sample:.2f}→{holdout:.2f} "
+                             f"(gap {gap:+.2f} > {_COLLAPSE_GAP})")
+            elif in_sample >= _NEAR_PERFECT:
                 fail = True
                 flags.append(f"near-perfect in-sample {metric} {in_sample:.2f} with "
                              f"{in_sample:.2f}→{holdout:.2f} drop (gap {gap:+.2f}) — memorization")
