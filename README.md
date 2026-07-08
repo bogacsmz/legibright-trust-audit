@@ -92,6 +92,16 @@ Env: `datahub ingest` reads `MATCHES_DB` / `DATAHUB_GMS_URL` (both default sensi
 - `src/trust_layer/agent.py` — orchestration + lineage propagation
 - `ingest/`, `demo/scenario.md`, `docs/PLAN.md`, `docs/OSS_CONTRIBUTION.md`
 
+## We audited ourselves (a trust tool must survive its own scrutiny)
+A 3-round adversarial self-audit (separate clean-context grader agents; author as builder;
+**no test ever loosened to go green**) found and fixed real blind spots — silent green on empty
+evidence, a 41% false-red calibration bias, invisible target/group leakage, non-idempotent
+write-back. All fixed and locked as regressions. See **`docs/VERIFICATION.md`** for the full
+tested / fixed / honest-limitations ledger, and run:
+```bash
+python scripts/verify_all.py     # 16 adversarial regression checks (no DataHub needed for the core)
+```
+
 ## Status
-M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ (Assertion+Incident+Tag land in GMS).
-Next: demo seed + honest-metrics run on real data. See `docs/PLAN.md`.
+M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ · auto-fed + MCP ✅ · Sentinel suite ✅ ·
+OSS skill ✅ · 3-round self-audit ✅ (43 tests + 16 verify_all checks green). See `docs/PLAN.md`.
