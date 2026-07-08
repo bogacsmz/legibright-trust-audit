@@ -23,6 +23,19 @@ class AuditReport:
     findings: list[Finding] = field(default_factory=list)
     verdict: Verdict = Verdict.TRUSTWORTHY
 
+    def trust_score(self) -> int:
+        """0-100 statistical-honesty score, banded to the verdict:
+        TRUSTWORTHY 71-100 · INCONCLUSIVE 45-70 · NOT_TRUSTWORTHY 0-40."""
+        fails = sum(1 for f in self.findings if f.severity is Severity.FAIL)
+        warns = sum(1 for f in self.findings if f.severity is Severity.WARN)
+        if not self.findings:
+            return 50                                   # no evidence → mid INCONCLUSIVE
+        if fails:
+            return max(0, 40 - 12 * (fails - 1) - 3 * warns)
+        if warns:
+            return max(45, 70 - 10 * warns)
+        return 100
+
     def compute_verdict(self) -> Verdict:
         if not self.findings:
             # no checks ran ≠ trustworthy. Absence of evidence is INCONCLUSIVE, never green.
@@ -37,9 +50,11 @@ class AuditReport:
 
 
 class TrustLayerAgent:
-    def __init__(self, client=None, *, write_back: bool = True):
+    def __init__(self, client=None, *, write_back: bool = True, propose_deprecation: bool = False):
         self.client = client            # DataHubClient | None (None = dry run)
         self.write_back = write_back and client is not None
+        # opt-in governance: on NOT_TRUSTWORTHY, propose (not enact) deprecation for human review
+        self.propose_deprecation = propose_deprecation
 
     def audit(self, target_urn: str, findings: list[Finding]) -> AuditReport:
         """Assemble findings into a report and (optionally) write verdicts to the graph."""
@@ -94,6 +109,12 @@ class TrustLayerAgent:
         # 3) tags — reconciled once so the graph reflects the LATEST verdict
         current_tags = sorted({t for f in report.findings for t in f.suggested_tags})
         _try("tags", lambda: self.client.reconcile_tags(urn, current_tags))
+        # 4) Trust Score — a typed numeric structured property (not a tag)
+        _try("trust_score", lambda: self.client.set_trust_score(urn, report.trust_score()))
+        # 5) opt-in governance: PROPOSE (not enact) deprecation on an untrustworthy verdict
+        if self.propose_deprecation and report.verdict is Verdict.NOT_TRUSTWORTHY:
+            reason = next((f.headline for f in report.findings if f.failed), "failed trust audit")
+            _try("deprecation-proposal", lambda: self.client.propose_deprecation(urn, reason))
 
         if errors:  # surface partial-write inconsistency instead of hiding it
             print(f"[write-back] {len(written)} ok, {len(errors)} FAILED: " + "; ".join(errors))

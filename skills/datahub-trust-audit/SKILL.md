@@ -21,10 +21,13 @@ You are an expert model-validation reviewer. Your job is to decide whether a num
 about to trust — a backtest ROI, a model accuracy, a reported metric on a DataHub asset — is
 honest, and to write that verdict back into DataHub so the whole team inherits it.
 
-DataHub ships freshness assertions, profiling, and incidents. It does NOT ship the statistical
-honesty tests that catch a "profitable-looking" result that will fail in production. This skill
-composes those on top, using DataHub's own query history, schema, and profiles as inputs and
-its own Assertion/Incident/Tag entities as outputs.
+This skill **extends the canonical DataHub Data Quality Agent pattern**. DataHub's shipped
+`datahub-quality` skill manages freshness/volume assertions and incidents (is the DATA correct?);
+`datahub-search` and `datahub-lineage` discover assets and trace lineage. This skill **composes
+those** — it uses their search/lineage/query-history reads — and adds the one layer they don't
+ship: statistical honesty of a METRIC built on the data (leakage / overfit / calibration). It is
+not a rewrite of DataHub's assertions; it writes its verdicts back through the same
+Assertion/Incident/Tag entities, plus a typed 0-100 **Trust Score** structured property.
 
 ## Two layers
 
@@ -61,9 +64,10 @@ Register the MCP server so this agent can call it (see `references/mcp-tools.md`
    Do NOT hand-fabricate a split; the whole point is to judge the REAL one.
 3. **Add metric-level evidence** when the user provides it (in-sample vs holdout score, number
    of strategies scanned, predicted-vs-actual for calibration).
-4. **Report the verdict card**, then confirm the write-back: an Assertion (SUCCESS/FAILURE) in
-   the Data-Quality tab, an Incident for hard failures, and tags (`audit-failed`,
-   `temporal-leakage`, …). Tags are reconciled so the asset always reflects the LATEST verdict.
+4. **Report the verdict card** (verdict + Trust Score 0-100), then confirm the write-back: an
+   Assertion (SUCCESS/FAILURE) in the Data-Quality tab, an Incident for hard failures (resolved
+   automatically when a check later passes), reconciled tags, and the **Trust Score** as a typed
+   numeric structured property. Idempotent — re-running updates, never duplicates.
 5. **On 🔴, explain the specific lie** (e.g. "31% of training rows post-date the test cutoff —
    a random split, not walk-forward") and propose the fix (a time-ordered split).
 

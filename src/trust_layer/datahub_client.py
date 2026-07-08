@@ -125,6 +125,18 @@ class DataHubClient:
 
         return writeback.reconcile_tags(self._graph, urn, current)
 
+    def set_trust_score(self, urn: str, score: float) -> str:
+        """Write the 0-100 Trust Score as a typed numeric structured property."""
+        from . import writeback
+
+        return writeback.set_trust_score(self._graph, urn, score)
+
+    def propose_deprecation(self, urn: str, reason: str) -> str:
+        """Propose (not enact) deprecation — human-in-the-loop governance."""
+        from . import writeback
+
+        return writeback.propose_deprecation(self._graph, urn, reason)
+
     def emit_assertion_result(self, urn: str, check_id: str, passed: bool, detail: str) -> str:
         """CUSTOM/EXTERNAL assertion + run result → lives in DataHub's Data-Quality tab."""
         from . import writeback

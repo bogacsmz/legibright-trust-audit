@@ -1,0 +1,16 @@
+{
+  "name": "datahub-trust-audit",
+  "metadata": {
+    "description": "A DataHub skill that audits statistical honesty of metrics/models — leakage, overfit, calibration — and contributes verdicts back to the graph. Composes the official datahub-search and datahub-quality skills and adds the statistical layer they lack. Intended for contribution to datahub-project/datahub-skills as a 6th skill."
+  },
+  "owner": {
+    "name": "Statistical Trust Layer contributors"
+  },
+  "plugins": [
+    {
+      "name": "datahub-trust-audit",
+      "source": "./",
+      "description": "Statistical trust auditing skill for DataHub (see skills/datahub-trust-audit/SKILL.md)."
+    }
+  ]
+}

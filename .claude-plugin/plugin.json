@@ -1,0 +1,8 @@
+{
+  "name": "datahub-trust-audit",
+  "version": "0.1.0",
+  "description": "Statistical trust auditing for DataHub. Judges whether a metric/model built on a dataset is trustworthy (temporal/target/group leakage, overfit, calibration) and writes the verdict + a 0-100 Trust Score back to the graph as assertions, incidents, tags, and a typed structured property. Extends the canonical Data Quality Agent pattern with the statistical-honesty layer the shipped skills don't cover.",
+  "author": {
+    "name": "Statistical Trust Layer contributors"
+  }
+}

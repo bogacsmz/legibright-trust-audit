@@ -15,7 +15,7 @@ _VERDICT_ICON = {
 def render_card(report: AuditReport) -> str:
     lines = [
         "┌─────────────────────────────────────────────────────────────",
-        f"│  TRUST LAYER AUDIT — {_VERDICT_ICON[report.verdict]}",
+        f"│  TRUST LAYER AUDIT — {_VERDICT_ICON[report.verdict]}  (Trust Score {report.trust_score()}/100)",
         f"│  target: {report.target}",
         "├─────────────────────────────────────────────────────────────",
     ]

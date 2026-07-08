@@ -9,6 +9,14 @@ the model's dataset and lineage from DataHub via the **MCP Server**, runs the st
 honesty tests that a plain "look, it's profitable!" backtest hides, and **writes the verdict
 back into the DataHub graph** as an Assertion + Incident + Tag — so the whole team inherits it.
 
+## Positioning: extend, don't rewrite
+This **extends DataHub's canonical Data Quality Agent pattern**. It composes the official
+`datahub-search` / `datahub-lineage` / `datahub-quality` skills (search, lineage, query history,
+assertions, incidents) and adds the one thing they don't ship: the **statistical honesty of a
+metric** built on the data. DataHub's shipped skills answer *"is the DATA correct?"*; this
+answers *"is the NUMBER trustworthy?"*. We write verdicts back through DataHub's own
+Assertion / Incident / Tag entities — not reimplemented, extended.
+
 ## The star: the Auditor (this is the original part)
 DataHub already ships freshness/volume assertions, profiling, and incidents. It does **not**
 ship *statistical honesty*. That's what we add on top:
@@ -61,10 +69,26 @@ python scripts/audit_auto.py              # agent reads it, catches the leak, wr
 ## Contribute back to the graph (verified live)
 On a verdict the agent emits, against live GMS:
 - a **CUSTOM/EXTERNAL Assertion** + run result (SUCCESS/FAILURE) → DataHub's Data-Quality tab,
-- an **ACTIVE Incident** with the failure detail → the asset's Incidents tab,
-- **Tags** (`audit-failed`, `contaminated-upstream`) → fast visible signal.
+- an **Incident** with the failure detail → the asset's Incidents tab (auto-resolved when a check later passes),
+- reconciled **Tags** (`audit-failed`, `temporal-leakage`, …) → fast visible signal,
+- a typed **Trust Score (0-100)** as a numeric **structured property** — queryable/sortable in the catalog.
 
-`src/trust_layer/writeback.py` is verified end-to-end (write → read-back) on DataHub 1.6.
+**Trust Score ≠ DataHub Analytics Agent's context-quality-score.** Theirs measures how well the
+catalog metadata supported a question (context completeness). Ours measures whether *this dataset's
+metric/model claim is statistically trustworthy* (leakage/overfit/calibration) — a different axis.
+
+Write-back is **idempotent** (deterministic entity keys per dataset+check → re-runs update, never
+duplicate) and verified end-to-end (write → read-back) on DataHub 1.6. See `docs/VERIFICATION.md`.
+
+**Governed, not unilateral (opt-in).** With `propose_deprecation=True`, an untrustworthy verdict
+also files a **deprecation proposal** (`deprecated=false` + a note) — the agent proposes, a human
+approves. It respects DataHub's governance model rather than deleting/deprecating on its own.
+
+## Install as a DataHub skill
+`skills/datahub-trust-audit/` conforms to the `datahub-project/datahub-skills` format (SKILL.md +
+`references/` + `templates/`), and `.claude-plugin/{plugin,marketplace}.json` make it installable as
+a Claude Code plugin — a 6th skill alongside the official five (setup/search/lineage/enrich/quality).
+Submittable upstream as-is; see `docs/OSS_CONTRIBUTION.md` and `docs/upstream/`.
 
 ## Quickstart (fully reproducible from a clean clone)
 ```bash

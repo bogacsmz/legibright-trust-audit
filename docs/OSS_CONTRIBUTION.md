@@ -15,6 +15,11 @@ The engine is a real installable package: `pip install -e .` exposes the `trust-
 `python -m trust_layer.mcp_server` (MCP). The statistical core is domain-agnostic (proven on
 betting + Bike Sharing + Titanic) so the skill is genuinely reusable, not demo-bound.
 
+**Installable as a Claude Code plugin.** `.claude-plugin/plugin.json` + `marketplace.json` match
+the `datahub-project/datahub-skills` schema, so the skill installs as a 6th skill alongside the
+official five (setup / search / lineage / enrich / quality). It composes `datahub-search` and
+`datahub-quality` and adds the statistical-honesty layer they don't ship — extend, not rewrite.
+
 ## 2. Submittable upstream artifacts (`docs/upstream/`)
 - **New skill** → `datahub-project/datahub-skills` (the `datahub-trust-audit/` folder as-is).
 - **RFC** `RFC-statistical-honesty-assertions.md` — proposes statistical-honesty checks as a

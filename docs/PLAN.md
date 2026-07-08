@@ -22,6 +22,21 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
   geri okundu. `demo_writeback.py` 30.352 gerçek maçta Auditor koşup verdict'i graph'a yazıyor
   (🔴 NOT TRUSTWORTHY: leakage+overfit yakalandı, calibration doğru geçti).
 
+## Polish + DataHub-akıcılığı turu (8 Tem) ✅
+- **Vocabulary/konumlama:** README/SKILL "extend the Data Quality Agent pattern; compose
+  datahub-search+datahub-quality; add statistical-honesty layer" diliyle yeniden yazıldı.
+- **Trust Score:** 0-100, tag değil TYPED numeric structured property (`trust-layer.trust_score`);
+  Analytics Agent'ın context-quality-score'undan açıkça ayrıldı (farklı eksen).
+- **OSS skill:** `.claude-plugin/{plugin,marketplace}.json` (resmi datahub-skills şeması) → 6.
+  skill olarak kurulabilir + submit edilebilir.
+- **Governed verdict:** opt-in `propose_deprecation` — AUDIT FAILED'de deprecation ÖNERİR
+  (deprecated=false + not), insan onaylar. Governance modeline saygı.
+- 48/48 test + verify_all 16/16 yeşil.
+
+## Future work (docs/PLAN.md)
+- DataHub Cloud'un formal proposals API'siyle deprecation önerisini gerçek proposal olarak sun.
+- Auto-fed akışa feature-store entegrasyonu (target/group leakage'ı otomatik besle).
+
 ## Faz 2 — Moat derinliği (9–22 Tem)
 - **Adım 2 ✅ (8 Tem):** Auditor MCP'den otomatik besleniyor — `split_inference.py` query
   history SQL'ini sqlglot ile TEMPORAL/RANDOM sınıflıyor; `mcp_server.py` Auditor'ı MCP tool
