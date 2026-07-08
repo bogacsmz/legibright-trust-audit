@@ -1,16 +1,20 @@
 # DataHub ingestion recipe: İddaa/Nesine/Pinnacle odds snapshots (SQLite).
 # Run: datahub ingest -c ingest/recipes/iddaa.yml
-# Env: DATAHUB_GMS_URL, DATAHUB_GMS_TOKEN must be set (see .env).
+# Requires: pip install 'acryl-datahub[sqlalchemy]'  (DataHub has no dedicated sqlite
+#           source; the generic sqlalchemy source + a sqlite:// URI is the supported path.)
 
 source:
-  type: sqlite
+  type: sqlalchemy
   config:
-    # sqlite via sqlalchemy; path from your local checkout of tr-spor-value
-    database: "${IDDAA_DB}"
+    platform: sqlite
+    connect_uri: "sqlite:///${IDDAA_DB}"
     include_views: true
+    # NOTE: DataHub's profiler forces a connection pool (max_overflow) that SQLite's
+    # NullPool rejects. We keep profiling OFF here and compute distributions/nulls
+    # ourselves from the source — which is the point: our checks own the statistics,
+    # not DataHub's profiler.
     profiling:
-      enabled: true          # gives us null counts / distributions to audit
-      profile_table_level_only: false
+      enabled: false
 
 sink:
   type: datahub-rest

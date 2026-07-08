@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """MILESTONE 1 — end-to-end 'hello world':
-read ONE dataset's health from DataHub and print a verdict card.
+read ONE dataset's schema from DataHub + its recent values from source, run the
+statistical freshness check, print a verdict card.
 
-Prereqs:
-  1. DataHub quickstart running (scripts/quickstart_up.sh) at http://localhost:8080
-  2. A dataset ingested (ingest/sqlite_to_datahub.py) — e.g. our odds snapshots table
-  3. pip install -e .   (installs acryl-datahub + deps)
+Proves the full path: DataHub read (SDK) → statistical check → verdict.
+Write-back + lineage propagation land in milestone 2.
 
-What it proves: DataHub read (schema + recent values via SDK) → statistical freshness
-check → verdict card. The write-back + lineage propagation land in milestone 2.
+Prereqs: quickstart up, `datahub ingest -c ingest/recipes/iddaa.yml` done, `pip install -e .`
 """
 from __future__ import annotations
 
+import sqlite3
+import statistics
 import sys
 
-from trust_layer.agent import AuditReport, TrustLayerAgent
+from trust_layer.agent import AuditReport
 from trust_layer.checks.freshness import FreshnessCheck
 from trust_layer.config import CONFIG
 from trust_layer.report import render_card
@@ -22,33 +22,42 @@ from trust_layer.report import render_card
 
 def main(urn: str | None = None) -> int:
     CONFIG.require_gms()
-    try:
-        from trust_layer.datahub_client import DataHubClient
-    except RuntimeError as e:
-        print(f"[setup] {e}")
-        return 2
+    from trust_layer.datahub_client import DataHubClient
 
     client = DataHubClient()
-    # Default demo target: the İddaa odds snapshot table once ingested.
-    urn = urn or client.dataset_urn("sqlite", "iddaa_snap.snaps")
+    # Real ingested dataset (sqlite schema is 'main'):
+    urn = urn or client.dataset_urn("sqlite", "main.snaps")
 
     fields = client.get_schema_fields(urn)
     if not fields:
-        print(f"[milestone1] No schema for {urn}. Ingest it first (ingest/sqlite_to_datahub.py).")
+        print(f"[milestone1] No schema for {urn}. Run: datahub ingest -c ingest/recipes/iddaa.yml")
         return 1
-    print(f"[milestone1] read {len(fields)} fields from {urn}")
+    print(f"[milestone1] DataHub → read {len(fields)} fields from {urn}:")
+    print("            " + ", ".join(f["fieldPath"] for f in fields))
 
-    # For the hello-world we assert freshness on a numeric column using a tiny
-    # sample the SDK/query layer will provide in milestone 2; here we show the path.
-    finding = FreshnessCheck().run(
-        recent_values=[2.0, 2.0, 2.0, 2.0, 2.0],  # placeholder until query wiring (day 2)
-        historical_stdev=0.7,
-        column="o1",
-    )
+    # Pull the recent odds values for the '1' (home win) column from the source table,
+    # plus a historical stdev baseline, and run the real freshness check.
+    recent, hist_stdev, col = _sample_odds(CONFIG.iddaa_db, column="o1")
+    print(f"[milestone1] source → {len(recent)} recent '{col}' values; hist σ={hist_stdev:.3f}")
+
+    finding = FreshnessCheck().run(recent_values=recent, historical_stdev=hist_stdev, column=col)
     report = AuditReport(target=urn, findings=[finding])
     report.compute_verdict()
     print(render_card(report))
     return 0
+
+
+def _sample_odds(db_path: str, column: str, recent_n: int = 40):
+    """Most-recent `column` values + a robust historical stdev, from the snaps table."""
+    conn = sqlite3.connect(db_path)
+    rows = [r[0] for r in conn.execute(
+        f"SELECT {column} FROM snaps WHERE {column} IS NOT NULL ORDER BY fetched_at DESC LIMIT ?",
+        (recent_n,))]
+    allvals = [r[0] for r in conn.execute(
+        f"SELECT {column} FROM snaps WHERE {column} IS NOT NULL")]
+    conn.close()
+    hist = statistics.pstdev(allvals) if len(allvals) > 2 else 1.0
+    return rows, hist, column
 
 
 if __name__ == "__main__":
