@@ -4,7 +4,7 @@
 
 **Reading speed:** ~130 words per minute (slow and clear). Pause 1–2 seconds between scenes —
 let the last card or number sit on screen before you speak again.
-**Total voiceover: ~325 words** (~2:30 of speech), leaving room for pauses and screen time to land
+**Total voiceover: ~332 words** (~2:33 of speech), leaving room for pauses and screen time to land
 under 3:00.
 
 **Pronunciation help (say these slowly):**
@@ -21,12 +21,12 @@ Verdict colors stay as-is on screen (🟢🟡🔴); title/transition cards are i
 
 ## Scene 1 — Hook (0:00–0:15)
 [SCREEN: Title card — `demo/cards/title-open.png`]
-[ON-SCREEN TEXT: "Who checks if an AI's model is trustworthy? Nobody. Until now."]
-[VOICEOVER: "AI agents can write code, build pipelines, and train models. But is the model any good? Or does it just look good on paper? Right now, nobody checks. Legibright checks. And it starts by checking itself."]
+[ON-SCREEN TEXT: "Agents need to trust their data before they act. Who checks that? Nobody. Until now."]
+[VOICEOVER: "AI agents can write code, build pipelines, and train models. But before another agent trusts that model and acts on it — is it any good? Or does it just look good on paper? Right now, nobody checks. Legibright is that check. And it starts by checking itself."]
 
 ## Scene 2 — The Catch (0:15–1:00)
 [SCREEN: Terminal running `demo/run_demo.sh`, Beat 1 (`demo_writeback.py`) — let the verdict card print live, then cut to the DataHub UI on `main.matches` (Incidents + Quality tabs)]
-[ON-SCREEN TEXT: "11,849 real matches. Claim: +40% profit. 99.8% of the training data is from AFTER the test period. Trust Score: 28/100."]
+[ON-SCREEN TEXT: "11,849 real matches. Claim: +40% profit. 99.8% of the training data is from AFTER the test period. Trust Score: 28/100 → incident + tag + deprecation proposal, written into DataHub."]
 [VOICEOVER: "Here is real data: almost twelve thousand football matches. A model claims plus-forty-percent profit. Looks like a big win. Legibright checks it. It finds that ninety-nine ~ point eight ~ percent of the training data came from AFTER the test period. That is not a fair test. The model saw the future. Legibright gives it a Trust Score: twenty-eight out of one hundred. Not trustworthy. And it writes this straight into DataHub: an incident, a tag, the score, and a note saying 'maybe remove this dataset.'"]
 
 ## Scene 3 — Trust, Not Accuracy (1:00–1:35)

@@ -18,12 +18,15 @@
 > Brand: **Legibright** — the "L" is a ✓ (checkmark), the audit/trust mark. Palette: indigo
 > `#1E1B4B` / `#4F46E5` / `#6366F1`. Assets in [`docs/assets/`](docs/assets/).
 
-**Agents That Do Real Work — end to end.** Legibright is an autonomous agent, not a validation
-library. It reads a model's dataset and lineage from DataHub over the **MCP Server**, runs the
-statistical-honesty checks a "look, it's profitable!" backtest hides, and then *acts on the graph*:
-it opens an **Incident**, stamps **Tags**, writes a 0–100 **Trust Score** property, and files a
-**deprecation proposal** for a human to approve. Other agents invoke it as an MCP tool.
-**Closed loop: detect → write back → propose → hand off.**
+**Agents That Do Real Work — end to end.** Agents need reliable context before they act. Legibright
+is that trust gate: it decides which datasets and models an agent can safely rely on, before the
+agent acts on them. It's an autonomous agent, not a validation library — it reads a model's dataset
+and lineage from DataHub over the **MCP Server**, runs the statistical-honesty checks a "look, it's
+profitable!" backtest hides, and then *acts on the graph*: it opens an **Incident**, stamps **Tags**,
+writes a 0–100 **Trust Score** property, and files a **deprecation proposal** for a human to approve.
+Other agents invoke it as an MCP tool. **Closed loop: detect → write to the catalog → propose a
+fix → hand off.** The verdict lives as a first-class DataHub citizen next to the data it's about —
+not a side report in a console or a Slack message. Trust belongs in the catalog.
 
 > **Trust ≠ accuracy.** Legibright scores *honesty*, not performance. A bike-demand model that's only
 > ~57% accurate but *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a leaky

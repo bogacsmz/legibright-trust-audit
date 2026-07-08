@@ -11,16 +11,23 @@
 > 🔍 **15 bugs found in ourselves — and fixed** across a 3-round adversarial self-audit + demo/UI hardening
 > + a fresh delta audit, nothing loosened to go green. The one honesty tool that survives its own honesty test → [`docs/VERIFICATION.md`](VERIFICATION.md).
 
+**Agents need reliable context to act.** Legibright is the trust gate: it decides which data and
+models an agent can rely on, before that agent acts on them — and it writes that decision back into
+DataHub itself, not a side report.
+
 ## Elevator pitch
 AI agents now write the SQL, build the pipeline, and train the model — but nobody audits whether
 the model they ship is *trustworthy* or just an overfit lie that looks great on paper. **Legibright
 is the agent that audits statistical honesty** — temporal/target/group leakage, overfit, calibration —
-and writes its verdict back into DataHub as an incident, tags, a 0–100 Trust Score, and a deprecation
-proposal. It's not a text-to-SQL agent; it does the one thing DataHub's shipped tools don't.
+and closes the loop by writing its verdict back into DataHub: an incident, tags, a 0–100 Trust Score,
+and a deprecation proposal for a human to approve. It doesn't just catch the problem — it hands the
+next person a fix. It's not a text-to-SQL agent; it does the one thing DataHub's shipped tools don't.
 
 ## Why it's "Agents That Do Real Work"
-*Does it do real, autonomous, useful work end-to-end?* Yes — the full loop runs with no human in the
-middle until the graph is already updated and a decision is queued:
+*Does it do real, autonomous, useful work end-to-end?* Yes. Other agents need reliable context
+before they act — this is the trust gate that decides what they can rely on, and the decision lands
+where the rest of the team already looks: inside the catalog, not a side report. The full loop runs
+with no human in the middle until the graph is already updated and a decision is queued:
 - **Reads** the dataset, lineage, and query history from DataHub over the **MCP Server** — real context, not a toy input.
 - **Decides** by running statistical-honesty checks (leakage / overfit / calibration) and computing a verdict + Trust Score.
 - **Acts on the graph** — opens an **Incident**, stamps **Tags**, writes the **Trust Score** as a typed property, files a **deprecation proposal**. These are native artifacts a data team already consumes, not a console print.
@@ -58,9 +65,10 @@ Then it proves it doesn't cry wolf: an honest model (Bike Sharing) passes 🟢 *
 
 ## How it scores on the six criteria (one line + clickable evidence)
 
-**1 · Use of DataHub — deep, native, write-back.** Reads over MCP and *writes back* native Assertion +
-Incident + Tag + Trust Score property + a deprecation proposal + agent avatar; installs as the 6th
-DataHub Skill; built on DataHub's MCP Server + Skills, extends the Data Quality Agent pattern.
+**1 · Use of DataHub — trust belongs in the catalog.** Legibright writes trust signals as first-class
+DataHub citizens, not a side report: reads over MCP and *writes back* native Assertion + Incident +
+Tag + Trust Score property + a deprecation proposal + agent avatar; installs as the 6th DataHub
+Skill; built on DataHub's MCP Server + Skills, extends the Data Quality Agent pattern.
 → [`writeback.py`](../src/trust_layer/writeback.py) · [`datahub_client.py`](../src/trust_layer/datahub_client.py) · [`skills/`](../skills/datahub-trust-audit/) · [`.claude-plugin/`](../.claude-plugin/)
 
 **2 · Technical Execution — tested & reproducible.** 53/53 unit tests + a 16-check adversarial suite
