@@ -1,22 +1,33 @@
-# Open-Source Contribution Plan (bonus criterion)
+# Open-Source Contribution (bonus criterion) — DELIVERED
 
-The Auditor is built as a **liftable module** so it can become an upstream contribution,
-not just a demo. Everything statistical lives behind `checks/honest_metrics/registry.py`
-with declared inputs and zero DataHub coupling — extraction is mechanical.
+The Auditor + Sentinel are packaged as a standalone, liftable capability with zero coupling to
+our betting demo, plus a DataHub-format skill, plus submittable upstream artifacts.
 
-## Planned contribution (pick 1–2 before submit, ~day 28)
-1. **`datahub-skill-honest-metrics`** — package the registry as a DataHub *skill*: given a
-   dataset/metric URN, the skill fetches split + predictions via MCP and returns a verdict
-   + emits the assertion. This is the cleanest "extend DataHub" artifact.
-2. **Docs / RFC** — a short guide: "Statistical honesty assertions on top of DataHub"
-   (temporal-leakage / calibration as CUSTOM assertions). Low effort, high visibility.
-3. **Fix / example PR** — the SQLite-profiling `max_overflow` failure we hit
-   (`ingest/recipes/iddaa.yml` note) is a real rough edge; a small docs/issue or config
-   example for SQLite ingestion is a legitimate upstream improvement.
+## 1. Packaged skill (primary)
+`skills/datahub-trust-audit/` — conforms to the real `datahub-project/datahub-skills` format:
+- `SKILL.md` with YAML frontmatter (`name`, `description` + triggers, `user-invocable`,
+  `min-cli-version`, `allowed-tools`), a Multi-Agent Compatibility section, setup, workflow,
+  and judgment rules — modelled on the repo's `datahub-search` / `datahub-quality` skills.
+- `references/mcp-tools.md` — the engine's MCP tool signatures.
+- `templates/audit-workflow.md` — a worked audit.
+
+The engine is a real installable package: `pip install -e .` exposes the `trust-layer` CLI and
+`python -m trust_layer.mcp_server` (MCP). The statistical core is domain-agnostic (proven on
+betting + Bike Sharing + Titanic) so the skill is genuinely reusable, not demo-bound.
+
+## 2. Submittable upstream artifacts (`docs/upstream/`)
+- **New skill** → `datahub-project/datahub-skills` (the `datahub-trust-audit/` folder as-is).
+- **RFC** `RFC-statistical-honesty-assertions.md` — proposes statistical-honesty checks as a
+  documented CUSTOM/EXTERNAL assertion pattern. Extends the assertion model, no new entity type.
+- **Docs fix** `docs-sqlite-profiling-fix.md` — a real rough edge we hit (SQLite + profiling
+  `max_overflow`), with a reproducer and suggested doc text.
+
+Per hackathon rules, RFCs and documentation improvements count; these are prepared and
+well-formed. Merge is not required for the bonus.
 
 ## Why this is "extend", not "rebuild"
-DataHub already ships: freshness assertions, volume assertions, column profiling, incidents.
-We do **not** reimplement those. We:
-- **read** DataHub's profiling / native assertion status (Sentinel consumes it),
-- **add** the statistical layer DataHub lacks (Auditor: leakage / overfit / calibration),
+DataHub ships freshness/volume/profiling assertions, schema history, and incidents. We:
+- **read** DataHub's profiling, schema, and query history (Sentinel + split inference),
+- **add** the statistical layer DataHub lacks (Auditor: leakage/overfit/calibration; Sentinel:
+  PSI/KS drift, null-spike, schema-drift diff),
 - **write** results back through DataHub's own Assertion + Incident + Tag entities.
