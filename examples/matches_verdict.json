@@ -1,0 +1,55 @@
+{
+  "dataset": "main.matches",
+  "target": "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.matches,PROD) :: backtest_roi",
+  "claim": "backtest_roi = +40%",
+  "rows_audited": 11849,
+  "source": "football-data.co.uk (public football closing odds)",
+  "verdict": "NOT_TRUSTWORTHY",
+  "trust_score": 28,
+  "findings": [
+    {
+      "check": "temporal_leakage",
+      "severity": "FAIL",
+      "headline": "TEMPORAL LEAKAGE — training data overlaps the test period",
+      "detail": "8277/8294 (99.8%) training rows are dated at/after the earliest test row. Split is not a clean time cut (train_max=1768345200 ≥ test_min=1599775200); looks like a RANDOM split masquerading as walk-forward.",
+      "metrics": {
+        "leak_ratio": 0.998,
+        "train_max": 1768345200.0,
+        "test_min": 1599775200.0
+      }
+    },
+    {
+      "check": "overfit_flags",
+      "severity": "FAIL",
+      "headline": "OVERFIT RED FLAGS present",
+      "detail": "in-sample ROI 0.40 > 0.20 implausibility alarm; holdout ROI collapsed to -0.12; holdout collapse: ROI 0.400→-0.120 (gap +0.520 > 0.25); 677 cells scanned → ~15.6 expected false z≥2 winners",
+      "metrics": {
+        "in_sample": 0.4,
+        "holdout": -0.12,
+        "gap": 0.52,
+        "n_cells": 677
+      }
+    },
+    {
+      "check": "calibration_bias",
+      "severity": "OK",
+      "headline": "well calibrated — ECE 0.019 below the 0.03 material floor (HL deviation significant, p=0.00012, but immaterial at n=11849)",
+      "detail": "HL χ²=31.4, p=0.000117, ECE=0.019 over 10 bins",
+      "metrics": {
+        "hl": 31.4462,
+        "p": 0.0001,
+        "ece": 0.0192
+      }
+    }
+  ],
+  "writeback": {
+    "assertions": 3,
+    "incidents_active": 1,
+    "tags": [
+      "audit-failed",
+      "temporal-leakage"
+    ],
+    "trust_score_property": 28,
+    "deprecation_proposal": true
+  }
+}

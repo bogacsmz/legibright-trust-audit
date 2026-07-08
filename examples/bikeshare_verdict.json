@@ -1,0 +1,39 @@
+{
+  "dataset": "main.bikeshare",
+  "target": "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.bikeshare,PROD)",
+  "claim": "daily-demand forecast R²",
+  "rows_audited": 731,
+  "source": "UCI ML Repository #275 Bike Sharing (public)",
+  "verdict": "TRUSTWORTHY",
+  "trust_score": 100,
+  "findings": [
+    {
+      "check": "temporal_leakage",
+      "severity": "OK",
+      "headline": "clean temporal split (train strictly precedes test)",
+      "detail": "",
+      "metrics": {
+        "train_max": 1341100800,
+        "test_min": 1341187200
+      }
+    },
+    {
+      "check": "overfit_flags",
+      "severity": "OK",
+      "headline": "no overfit red flags (R² generalizes)",
+      "detail": "",
+      "metrics": {
+        "in_sample": 0.7915,
+        "holdout": 0.5735,
+        "gap": 0.218
+      }
+    }
+  ],
+  "writeback": {
+    "assertions": 2,
+    "incidents_active": 0,
+    "tags": [],
+    "trust_score_property": 100,
+    "deprecation_proposal": false
+  }
+}

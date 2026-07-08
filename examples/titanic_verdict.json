@@ -1,0 +1,57 @@
+{
+  "dataset": "main.titanic",
+  "target": "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.titanic,PROD)",
+  "claim": "survival classifier accuracy",
+  "rows_audited": 891,
+  "source": "Kaggle / datasciencedojo Titanic (public)",
+  "verdict": "NOT_TRUSTWORTHY",
+  "trust_score": 25,
+  "findings": [
+    {
+      "check": "temporal_leakage",
+      "severity": "FAIL",
+      "headline": "TEMPORAL LEAKAGE — training data overlaps the test period",
+      "detail": "622/623 (99.8%) training rows are dated at/after the earliest test row. Split is not a clean time cut (train_max=890 ≥ test_min=1); looks like a RANDOM split masquerading as walk-forward.",
+      "metrics": {
+        "leak_ratio": 0.9984,
+        "train_max": 890.0,
+        "test_min": 1.0
+      }
+    },
+    {
+      "check": "overfit_flags",
+      "severity": "FAIL",
+      "headline": "OVERFIT RED FLAGS present",
+      "detail": "holdout collapse: accuracy 0.987→0.735 (gap +0.252 > 0.25)",
+      "metrics": {
+        "in_sample": 0.9872,
+        "holdout": 0.7351,
+        "gap": 0.2521,
+        "n_cells": 1
+      }
+    },
+    {
+      "check": "calibration_bias",
+      "severity": "WARN",
+      "headline": "calibration NOT certifiable — HL compromised (9/10 bins non-probabilistic), observed ECE 0.254 ≥ 0.03",
+      "detail": "HL χ²=0.2, p=1, ECE=0.254 over 10 bins",
+      "metrics": {
+        "hl": 0.185,
+        "p": 1.0,
+        "ece": 0.2536,
+        "hl_bins_used": 1
+      }
+    }
+  ],
+  "writeback": {
+    "assertions": 3,
+    "incidents_active": 1,
+    "tags": [
+      "audit-failed",
+      "audit-warn",
+      "temporal-leakage"
+    ],
+    "trust_score_property": 25,
+    "deprecation_proposal": true
+  }
+}
