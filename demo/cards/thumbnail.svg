@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-label="Legibright thumbnail">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E1B4B"/>
+      <stop offset="1" stop-color="#312B7A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <!-- mark, upper-centered -->
+  <g transform="translate(548 96) scale(4.1)" fill="none">
+    <path d="M16 16 V46" stroke="#FFFFFF" stroke-width="8.5" stroke-linecap="round"/>
+    <path d="M11 45 L20 50.5 L46 37" stroke="#6366F1" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="640" y="430" text-anchor="middle" font-family="'Space Grotesk','Inter','Arial',sans-serif"
+        font-weight="700" font-size="104" fill="#FFFFFF" letter-spacing="1">Legibright</text>
+  <text x="640" y="500" text-anchor="middle" font-family="'Inter','Arial',sans-serif"
+        font-weight="600" font-size="34" fill="#C7D2FE">Catch overfit &amp; data leakage — inside DataHub.</text>
+  <text x="640" y="560" text-anchor="middle" font-family="'Inter','Arial',sans-serif"
+        font-size="24" fill="#818CF8">🔴 NOT TRUSTWORTHY · Trust Score 28/100 · written back to the graph</text>
+</svg>

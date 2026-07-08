@@ -93,7 +93,9 @@ class TrustLayerAgent:
         def _try(label, fn):
             try:
                 r = fn()
-                if r:
+                if isinstance(r, list):
+                    written.extend(r)            # reconcile_tags returns a list of tag URNs
+                elif r:
                     written.append(r)
             except Exception as e:  # best-effort per artifact; one failure doesn't abort the rest
                 errors.append(f"{label}: {type(e).__name__}: {e}")

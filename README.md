@@ -126,6 +126,12 @@ Env: `datahub ingest` reads `MATCHES_DB` / `DATAHUB_GMS_URL` (both default sensi
 - `src/trust_layer/agent.py` — orchestration + lineage propagation
 - `ingest/`, `demo/scenario.md`, `docs/PLAN.md`, `docs/OSS_CONTRIBUTION.md`
 
+## Demo & submission
+- **[`demo/SCRIPT.md`](demo/SCRIPT.md)** — the ≤3-min video script (on-screen text + voiceover), every
+  number produced live. **[`demo/run_demo.sh`](demo/run_demo.sh)** — reproducible, idempotent driver.
+- **[`docs/SUBMISSION.md`](docs/SUBMISSION.md)** — the Devpost writeup (six criteria, each with evidence).
+- **[`demo/TITLE_CARDS.md`](demo/TITLE_CARDS.md)** + `demo/cards/` — brand title cards & thumbnail.
+
 ## We audited ourselves (a trust tool must survive its own scrutiny)
 A 3-round adversarial self-audit (separate clean-context grader agents; author as builder;
 **no test ever loosened to go green**) found and fixed real blind spots — silent green on empty
