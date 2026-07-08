@@ -33,6 +33,11 @@ audits a logged `backtest_roi = +40%` claim and, in one run:
 Then it proves it doesn't cry wolf: an honest model (Bike Sharing) passes 🟢 **100/100**, a leaky one
 (Titanic) fails 🔴 — on public datasets unrelated to betting.
 
+**Trust ≠ accuracy.** Legibright scores *honesty*, not performance: a bike-demand model that's only
+~57% accurate but *honestly* 57% (clean split, no overfit) earns Trust Score 100, while a leaky
+"40% ROI winner" earns 28. It rewards the modest-but-honest number and punishes the impressive lie —
+the opposite of what an accuracy dashboard does.
+
 ---
 
 ## How it scores on the six criteria (each with evidence)

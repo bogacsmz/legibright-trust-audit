@@ -38,3 +38,38 @@ def test_classify_sql_join_chain_does_not_hang():
 def test_classify_sql_garbage_is_graceful():
     for bad in ["", "not sql at all", "DROP TABLE x", "SÉLÉCT ünïcödé"]:
         assert classify_sql(bad).kind in (SplitKind.UNKNOWN, SplitKind.RANDOM)
+
+
+def _calib_case(shift):
+    """Large-n calibration: outcomes drawn from true p, predictions shifted by `shift`."""
+    import numpy as np
+
+    rng = np.random.default_rng(0)
+    n = 12000
+    p = rng.uniform(0.1, 0.9, n)
+    y = (rng.random(n) < p).astype(int)
+    pred = np.clip(p + shift, 0, 1)
+    return CalibrationBiasCheck().run(list(pred), list(y))
+
+
+def test_calibration_significant_but_immaterial_stays_ok():
+    # the demo case: at n=12k a 0.02 shift is HL-significant yet ECE<0.03 → must NOT cry wolf
+    f = _calib_case(0.02)
+    assert f.severity is Severity.OK
+    assert f.metrics["p"] < 0.05 and f.metrics["ece"] < 0.03   # significant yet immaterial
+
+
+def test_calibration_material_miscalibration_fails():
+    # a 0.12 shift is both significant AND material (ECE≥0.03) → must FAIL
+    f = _calib_case(0.12)
+    assert f.failed and f.metrics["ece"] >= 0.03
+
+
+def test_calibration_degenerate_hard_predictions_not_green():
+    # hard 0/1 predictions (overfit tree) that are badly calibrated make HL undefined (p=1);
+    # that must NOT read "well calibrated" — the observed ECE is material → WARN, not OK.
+    pred = [0.0] * 100 + [1.0] * 100
+    y = [1] * 30 + [0] * 70 + [0] * 30 + [1] * 70   # 30% wrong in each hard-prediction group
+    f = CalibrationBiasCheck().run(pred, y)
+    assert f.severity is Severity.WARN
+    assert f.metrics["ece"] >= 0.03 and f.metrics["hl_bins_used"] < 2

@@ -17,25 +17,26 @@ semantic (🟢🟡🔴). Watermark `legibright-mark.svg` bottom-right throughout
 ### 0:18–1:25 · LIVE CATCH — the aha  *(terminal running `demo_writeback.py`, DataHub UI in a second tab)*
 **ON-SCREEN (as the card prints):**
 - `Dataset: main.matches — 11,849 real football matches (public, reproducible)`
-- `Claim logged: "backtest_roi = +40%"  ✅ looks shippable`
+- `A model that looks like a massive winner: +40% ROI in backtest  ✅ ship it?`
 - `Legibright audits →`
-- `❌ TEMPORAL LEAKAGE — 99.8% of training rows dated after the earliest test match (random split in a walk-forward costume)`
+- `❌ TEMPORAL LEAKAGE — 99.8% of training rows are dated after the test window opens: a random split leaked the future`
 - `❌ OVERFIT — +40% in-sample vs −12% holdout (gap 0.52); 677 combos scanned → ~16 false winners by chance`
-- `✅ CALIBRATION — well calibrated (it does NOT flag what's fine)`
+- `✅ CALIBRATION — ECE 1.9% (below the 3% material floor): genuinely fine, so Legibright does NOT flag it`
 - `🔴 NOT TRUSTWORTHY · Trust Score 28/100`
 - `→ DataHub: incident (ACTIVE) · tags · Trust Score property · deprecation PROPOSED`
 
-**VO:** "Here's a dataset in DataHub and a logged claim — a backtest returning plus-forty-percent ROI. Every generic agent says ship it. Legibright audits the honesty. It measures, from the real match dates, that ninety-nine percent of the training rows are dated *after* the test period began — a random split wearing a walk-forward costume. It flags the overfit signature — plus forty in-sample, minus twelve on holdout. But calibration? It passes — Legibright doesn't cry wolf. Verdict: not trustworthy, Trust Score twenty-eight. And it doesn't just print that — it writes an incident, tags, a typed Trust Score, and even *proposes* deprecation, back into DataHub." *(cut to UI: red incident + Trust Score 28 on the asset)*
+**VO:** "Here's a dataset in DataHub and a model that looks like a massive winner — plus-forty-percent ROI in backtest. Every generic agent says ship it. Legibright audits the honesty. From the real match dates it measures that ninety-nine-point-eight percent of the training rows are dated *after* the test window opens — a random split leaked the future. It flags the overfit signature — plus forty in-sample, minus twelve on holdout. But calibration? That's genuinely fine — error under two percent — so Legibright passes it. It doesn't cry wolf. Verdict: not trustworthy, Trust Score twenty-eight. And it doesn't just print that — it writes an incident, tags, a typed Trust Score, and even *proposes* deprecation, back into DataHub." *(cut to UI: red incident + Trust Score 28 on the asset)*
 *This is the closed loop: detect → write back → propose a fix.*
 
-### 1:25–1:55 · NO WOLF-CRYING — the moat  *(terminal `generality_check.py`)*
+### 1:25–1:55 · NO WOLF-CRYING · trust ≠ accuracy — the moat  *(terminal `generality_check.py`)*
 **ON-SCREEN:**
-- `Same auditor, an HONEST model (Bike Sharing, clean time-split):`
-- `🟢 TRUSTWORTHY · Trust Score 100/100`
-- `A leaky one (Titanic): 🔴 NOT TRUSTWORTHY`
-- `✅ Generality proven on public data unrelated to betting.`
+- `Same auditor, an HONEST model (Bike Sharing, clean walk-forward): R² 0.57 on held-out data`
+- `🟢 TRUSTWORTHY · Trust Score 100/100   (band: TRUSTWORTHY 71–100)`
+- `This model is only ~57% accurate — but honestly 57%.`
+- `Legibright scores HONESTY, not accuracy.`
+- `A leaky model (Titanic): 🔴 NOT TRUSTWORTHY — caught. Public data, unrelated to betting.`
 
-**VO:** "A tool that flags everything red is useless. Same auditor, a genuinely honest model — it passes, green, a hundred out of a hundred. A leaky one — caught. And these are public datasets, Bike Sharing and Titanic, nothing to do with betting. It discriminates."
+**VO:** "A tool that flags everything red is useless. Same auditor, a genuinely honest model — a bike-demand forecast that's only about fifty-seven percent accurate. But it's *honestly* fifty-seven percent: clean time-split, no overfit. Trust Score — a hundred. Because Legibright scores honesty, not accuracy. A high number built on leakage fails; a modest number built honestly passes. The leaky Titanic model? Caught. Public datasets, nothing to do with betting — it discriminates."
 
 ### 1:55–2:25 · REAL DataHub + ANY AGENT  *(show MCP call / SKILL.md / the graph)*
 **ON-SCREEN:**

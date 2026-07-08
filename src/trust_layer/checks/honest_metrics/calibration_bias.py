@@ -46,8 +46,25 @@ class CalibrationBiasCheck(Check):
                            suggested_tags=["audit-warn"])
 
         bins = _quantile_bins(list(zip(predicted, outcomes)), n_bins)
-        hl, p, ece, rows = _hosmer_lemeshow(bins, n)
+        hl, p, ece, rows, used = _hosmer_lemeshow(bins, n)
         detail = f"HL χ²={hl:.1f}, p={p:.3g}, ECE={ece:.3f} over {len(bins)} bins"
+
+        if used < 2:
+            # HL is UNDEFINED: predictions are degenerate (e.g., hard 0/1 from an overfit tree),
+            # so every bin has E∈{0,ng}, denom=0, χ²=0 and p=1. That p is NOT evidence of good
+            # calibration — fall back to the observed ECE so a badly-calibrated hard classifier
+            # can't earn a green pass on a test that couldn't run.
+            if ece >= ece_material:
+                return Finding(self.id, Severity.WARN,
+                               f"calibration NOT certifiable — HL degenerate (predictions look "
+                               f"non-probabilistic), observed ECE {ece:.3f} ≥ {ece_material}",
+                               detail=detail,
+                               metrics={"hl": hl, "p": p, "ece": ece, "hl_bins_used": used},
+                               suggested_tags=["audit-warn"])
+            return Finding(self.id, Severity.OK,
+                           f"well calibrated — ECE {ece:.3f} immaterial (HL degenerate: "
+                           f"non-probabilistic predictions)",
+                           detail=detail, metrics={"hl": hl, "p": p, "ece": ece, "hl_bins_used": used})
 
         if p < p_fail and ece >= ece_material:
             return Finding(self.id, Severity.FAIL,
@@ -59,7 +76,15 @@ class CalibrationBiasCheck(Check):
             return Finding(self.id, Severity.WARN, f"calibration suspect (p={p:.2g}, ECE={ece:.3f})",
                            detail=detail, metrics={"hl": hl, "p": p, "ece": ece},
                            suggested_tags=["audit-warn"])
-        return Finding(self.id, Severity.OK, f"well calibrated ({detail})",
+        # OK — either not significant, or significant but IMMATERIAL (common at large n).
+        # Lead the headline with ECE (the metric that justifies the verdict); contextualize the
+        # bare p instead of letting a tiny "significant" p look like it contradicts the pass.
+        if p < p_warn:
+            msg = (f"well calibrated — ECE {ece:.3f} below the {ece_material} material floor "
+                   f"(HL deviation significant, p={p:.2g}, but immaterial at n={n})")
+        else:
+            msg = f"well calibrated — ECE {ece:.3f}, no significant HL deviation (p={p:.2g})"
+        return Finding(self.id, Severity.OK, msg, detail=detail,
                        metrics={"hl": hl, "p": p, "ece": ece})
 
 
@@ -81,6 +106,7 @@ def _hosmer_lemeshow(bins, n):
     hl = 0.0
     ece = 0.0
     rows = []
+    used = 0                       # bins that actually contributed to χ² (denom>0)
     for b, chunk in enumerate(bins):
         ng = len(chunk)
         pred = sum(p for p, _ in chunk) / ng
@@ -91,10 +117,11 @@ def _hosmer_lemeshow(bins, n):
         denom = E * (1 - E / ng) if 0 < E < ng else 0.0
         if denom > 0:
             hl += (O - E) ** 2 / denom
+            used += 1
         rows.append(f"[b{b}] pred={pred:.2f} obs={obs:.2f} n={ng}")
     df = max(len(bins) - 2, 1)
     p = _chi2_sf(hl, df)
-    return hl, p, ece, rows
+    return hl, p, ece, rows, used
 
 
 def _chi2_sf(x, df):
