@@ -5,9 +5,9 @@ improvements also count"), these qualify as open-source contributions independen
 
 | Artifact | Target repo | Type | Status |
 |---|---|---|---|
-| `datahub-trust-audit` skill | `datahub-project/datahub-skills` | **New skill** (SKILL.md + references + templates) | prepared, submittable — see `../../skills/datahub-trust-audit/` |
+| `datahub-trust-audit` skill | `datahub-project/datahub-skills` | **New skill** (SKILL.md + references + templates) | **open PR** [#30](https://github.com/datahub-project/datahub-skills/pull/30) — see `../../skills/datahub-trust-audit/` |
 | `RFC-statistical-honesty-assertions.md` | `datahub-project/datahub` (RFC / discussion) | **RFC** | prepared |
-| `docs-sqlite-profiling-fix.md` | `datahub-project/datahub` (docs) | **Docs fix** | prepared, includes reproducer |
+| `docs-sqlite-profiling-fix.md` | `datahub-project/datahub` (docs) | **Docs fix** | **open PR** [#18272](https://github.com/datahub-project/datahub/pull/18272), includes reproducer |
 
 ## Why these are legitimate
 - The **skill** conforms to the real datahub-skills format (YAML frontmatter, `references/`,
@@ -19,7 +19,7 @@ improvements also count"), these qualify as open-source contributions independen
   the profiler passes `max_overflow` to a NullPool engine. We include a minimal reproducer and
   the working recipe.
 
-## How to submit (when ready — not required for the hackathon)
-1. Skill: PR `skills/datahub-trust-audit/` into datahub-skills.
-2. RFC: open a GitHub Discussion / RFC PR referencing this doc.
-3. Docs fix: PR the ingestion-SQLite doc page with the reproducer + note.
+## Remaining: the RFC (not required for the hackathon)
+The skill and docs-fix are already open as PRs (linked above). The RFC has no PR-shaped target
+(it's a design discussion, not a file diff) — submit it as a GitHub Discussion or RFC issue
+referencing this doc, whenever there's a suitable venue in the datahub-project repo.

@@ -91,7 +91,7 @@ the thing DataHub doesn't do — write the verdict back into the graph, and prov
 own 3-round adversarial audit + delta pass (15 bugs found in ourselves, fixed).**
 
 ## Open-source contributions (contribute back)
-Two prepared PRs — clickable "contribute back" evidence (the rules count RFCs, docs, and skills):
+Two open PRs — clickable "contribute back" evidence (the rules count RFCs, docs, and skills):
 1. **New skill** → `datahub-project/datahub-skills`: the `datahub-trust-audit` skill, conforming to the
    repo template so it installs beside the official five.
    **PR:** https://github.com/datahub-project/datahub-skills/pull/30
@@ -99,8 +99,7 @@ Two prepared PRs — clickable "contribute back" evidence (the rules count RFCs,
    firsthand while ingesting demo data.
    **PR:** https://github.com/datahub-project/datahub/pull/18272
 
-Prepared PR bodies + exact fork/push/open steps are in [`contrib/`](../contrib/); plus an RFC for
-statistical-honesty assertions in [`docs/upstream/`](upstream/).
+Plus an RFC for statistical-honesty assertions in [`docs/upstream/`](upstream/).
 
 ## Try it in 60 seconds
 ```bash

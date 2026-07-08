@@ -27,8 +27,9 @@ official five (setup / search / lineage / enrich / quality). It composes `datahu
 - **Docs fix** `docs-sqlite-profiling-fix.md` — a real rough edge we hit (SQLite + profiling
   `max_overflow`), with a reproducer and suggested doc text.
 
-Per hackathon rules, RFCs and documentation improvements count; these are prepared and
-well-formed. Merge is not required for the bonus.
+Per hackathon rules, RFCs and documentation improvements count independent of merge. The skill
+and docs-fix are open, live PRs (see `docs/SUBMISSION.md`); the RFC is a prepared, well-formed
+design doc.
 
 ## Why this is "extend", not "rebuild"
 DataHub ships freshness/volume/profiling assertions, schema history, and incidents. We:
