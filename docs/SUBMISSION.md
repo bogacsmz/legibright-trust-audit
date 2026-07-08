@@ -92,9 +92,11 @@ own 3-round adversarial audit (14 bugs found in ourselves, fixed).**
 ## Open-source contributions (contribute back)
 Two prepared PRs — clickable "contribute back" evidence (the rules count RFCs, docs, and skills):
 1. **New skill** → `datahub-project/datahub-skills`: the `datahub-trust-audit` skill, conforming to the
-   repo template so it installs beside the official five. **PR:** _(link added on open — see [`contrib/`](../contrib/))_
+   repo template so it installs beside the official five.
+   **PR:** https://github.com/datahub-project/datahub-skills/pull/30
 2. **Docs fix** → `datahub-project/datahub`: a SQLite-profiling caveat (`max_overflow`/`NullPool`) we hit
-   firsthand while ingesting demo data. **PR:** _(link added on open — see [`contrib/`](../contrib/))_
+   firsthand while ingesting demo data.
+   **PR:** https://github.com/datahub-project/datahub/pull/18272
 
 Prepared PR bodies + exact fork/push/open steps are in [`contrib/`](../contrib/); plus an RFC for
 statistical-honesty assertions in [`docs/upstream/`](upstream/).
