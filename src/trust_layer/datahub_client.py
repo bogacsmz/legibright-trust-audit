@@ -137,6 +137,12 @@ class DataHubClient:
 
         return writeback.propose_deprecation(self._graph, urn, reason)
 
+    def set_auditor_owner(self, urn: str) -> str:
+        """Attach Legibright as an 'Auditor' (custom ownership type) so its avatar shows."""
+        from . import writeback
+
+        return writeback.set_auditor_owner(self._graph, urn)
+
     def emit_assertion_result(self, urn: str, check_id: str, passed: bool, detail: str) -> str:
         """CUSTOM/EXTERNAL assertion + run result → lives in DataHub's Data-Quality tab."""
         from . import writeback

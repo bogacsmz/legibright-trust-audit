@@ -148,6 +148,38 @@ def propose_deprecation(graph, dataset_urn: str, reason: str) -> str:
     return dataset_urn
 
 
+_OWNERSHIP_TYPE_URN = "urn:li:ownershipType:legibright_auditor"
+
+
+def ensure_auditor_ownership_type(graph) -> None:
+    """Define a custom *Auditor* ownership type once — NOT 'data owner'. Legibright grades the
+    asset's statistical honesty; it does not own or steward the data."""
+    try:
+        if graph.exists(_OWNERSHIP_TYPE_URN):
+            return
+    except Exception:
+        pass
+    graph.emit_mcp(MetadataChangeProposalWrapper(
+        entityUrn=_OWNERSHIP_TYPE_URN,
+        aspect=S.OwnershipTypeInfoClass(
+            name="Auditor",
+            description=("Legibright audited this asset's statistical honesty "
+                        "(leakage / overfit / calibration). It does NOT own the data."),
+            created=_stamp(), lastModified=_stamp())))
+
+
+def set_auditor_owner(graph, dataset_urn: str) -> str:
+    """Attach Legibright as an *Auditor* (custom ownership type) so its ✓-L avatar shows in the
+    Owners panel as an honest 'audited by' — not a false claim of data ownership. Idempotent."""
+    ensure_auditor_ownership_type(graph)
+    existing = graph.get_aspect(dataset_urn, S.OwnershipClass) or S.OwnershipClass(owners=[])
+    if not any(o.owner == _ACTOR and o.typeUrn == _OWNERSHIP_TYPE_URN for o in existing.owners):
+        existing.owners.append(S.OwnerClass(
+            owner=_ACTOR, type=S.OwnershipTypeClass.CUSTOM, typeUrn=_OWNERSHIP_TYPE_URN))
+        graph.emit_mcp(MetadataChangeProposalWrapper(entityUrn=dataset_urn, aspect=existing))
+    return _ACTOR
+
+
 def set_incident(graph, dataset_urn: str, *, check_id: str, active: bool,
                  title: str, description: str) -> str | None:
     """Idempotent incident lifecycle per (dataset, check):

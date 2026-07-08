@@ -113,6 +113,8 @@ class TrustLayerAgent:
         _try("tags", lambda: self.client.reconcile_tags(urn, current_tags))
         # 4) Trust Score — a typed numeric structured property (not a tag)
         _try("trust_score", lambda: self.client.set_trust_score(urn, report.trust_score()))
+        # 4b) Legibright as an *Auditor* owner → its ✓-L avatar shows in the Owners panel
+        _try("owner", lambda: self.client.set_auditor_owner(urn))
         # 5) opt-in governance: PROPOSE (not enact) deprecation on an untrustworthy verdict
         if self.propose_deprecation and report.verdict is Verdict.NOT_TRUSTWORTHY:
             reason = next((f.headline for f in report.findings if f.failed), "failed trust audit")
