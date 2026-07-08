@@ -1,7 +1,17 @@
+<p align="center">
+  <img src="docs/assets/legibright-lockup.svg" width="320" alt="Legibright"/>
+</p>
+<p align="center">
+  <b>A statistical trust layer that catches overfit &amp; data leakage in DataHub.</b>
+</p>
+
 # Statistical Trust Layer — a DataHub agent that tells you whether to trust a model
 
 > **Build with DataHub: The Agent Hackathon** · Challenge: *Agents That Do Real Work* · Apache-2.0
 > Deadline 10 Aug 2026.
+>
+> Brand: **Legibright** — the "L" is a ✓ (checkmark), the audit/trust mark. Palette: indigo
+> `#1E1B4B` / `#4F46E5` / `#6366F1`. Assets in [`docs/assets/`](docs/assets/) (see `BRAND.md`).
 
 **Before an ML/data team trusts a model, this agent automatically audits whether the model
 actually works — or whether it just fits stale data (overfit / temporal leakage).** It reads

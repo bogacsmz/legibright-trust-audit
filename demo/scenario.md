@@ -41,3 +41,11 @@ Structure: **problem → live AUDIT FAILED → write-back visible in DataHub →
 - Pre-ingest both dbs; pre-open the UI tabs so the refresh is instant.
 - Keep the Auditor the star; Sentinel is a 15-second cameo, not half the video.
 - 3 takes (our discipline). Target 2:45 to leave breathing room under the 3:00 cap.
+
+## Branding (Legibright)
+- **Title card:** Legibright lockup (`docs/assets/legibright-lockup.svg`) on a `#1E1B4B` (ink)
+  background; tagline in `#4F46E5`. The "L"-is-a-✓ mark reinforces the audit theme on frame 1.
+- **Watermark:** `legibright-mark.svg` bottom-right corner throughout, low opacity.
+- **Verdict colors** stay semantic (🟢/🟡/🔴), not brand indigo, so the verdict reads instantly.
+- If the agent avatar is set (below), the ✓-L shows next to the incidents it files in DataHub —
+  a nice on-screen "who wrote this" beat during Beat 3.
