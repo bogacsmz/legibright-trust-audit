@@ -16,3 +16,6 @@ data/*.db
 
 # datahub quickstart
 docker-compose.override.yml
+
+# datasets (public, redistributable; kept out of git to stay light)
+data/*.csv

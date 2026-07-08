@@ -37,7 +37,7 @@ AUDITOR_SKILLS: dict[str, AuditSkill] = {
     "overfit_flags": AuditSkill(
         id="overfit_flags",
         title="Overfit red-flag scanner",
-        inputs=("roi_in_sample", "roi_holdout", "n_cells_scanned"),
+        inputs=("in_sample", "holdout", "n_cells_scanned"),
         runner=OverfitFlagsCheck().run,
         catches="too-good in-sample ROI, in-sample≫holdout gap, multiple-testing luck",
     ),

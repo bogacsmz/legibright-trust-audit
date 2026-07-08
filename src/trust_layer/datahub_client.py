@@ -84,6 +84,12 @@ class DataHubClient:
 
         return writeback.emit_tag(self._graph, urn, tag)
 
+    def reconcile_tags(self, urn: str, current: list[str]) -> list[str]:
+        """Authoritatively set the agent's audit tags (drop stale, apply current)."""
+        from . import writeback
+
+        return writeback.reconcile_tags(self._graph, urn, current)
+
     def emit_assertion_result(self, urn: str, check_id: str, passed: bool, detail: str) -> str:
         """CUSTOM/EXTERNAL assertion + run result → lives in DataHub's Data-Quality tab."""
         from . import writeback

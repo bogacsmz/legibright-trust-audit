@@ -33,6 +33,10 @@ def _stamp() -> S.AuditStampClass:
     return S.AuditStampClass(time=_now_ms(), actor=_ACTOR)
 
 
+# tags this agent manages — reconciled on every audit so verdicts stay current
+_MANAGED_PREFIXES = ("audit-", "contaminated-", "temporal-", "silently-")
+
+
 def emit_tag(graph, dataset_urn: str, tag: str) -> str:
     tag_urn = f"urn:li:tag:{tag}"
     existing = graph.get_aspect(dataset_urn, S.GlobalTagsClass) or S.GlobalTagsClass(tags=[])
@@ -40,6 +44,22 @@ def emit_tag(graph, dataset_urn: str, tag: str) -> str:
         existing.tags.append(S.TagAssociationClass(tag=tag_urn))
     graph.emit_mcp(MetadataChangeProposalWrapper(entityUrn=dataset_urn, aspect=existing))
     return tag_urn
+
+
+def reconcile_tags(graph, dataset_urn: str, current: list[str]) -> list[str]:
+    """Authoritatively set this agent's audit tags: drop stale managed tags, apply current.
+
+    Keeps user/other tags untouched. Ensures a now-TRUSTWORTHY asset loses a prior
+    `audit-failed` — the graph always reflects the LATEST verdict.
+    """
+    existing = graph.get_aspect(dataset_urn, S.GlobalTagsClass) or S.GlobalTagsClass(tags=[])
+    kept = [t for t in existing.tags
+            if not any(t.tag.split(":")[-1].startswith(p) for p in _MANAGED_PREFIXES)]
+    for tag in current:
+        kept.append(S.TagAssociationClass(tag=f"urn:li:tag:{tag}"))
+    graph.emit_mcp(MetadataChangeProposalWrapper(entityUrn=dataset_urn,
+                                                 aspect=S.GlobalTagsClass(tags=kept)))
+    return [f"urn:li:tag:{t}" for t in current]
 
 
 def emit_assertion(graph, dataset_urn: str, *, check_id: str, passed: bool, detail: str) -> str:

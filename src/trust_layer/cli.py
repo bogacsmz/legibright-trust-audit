@@ -24,7 +24,7 @@ def selftest() -> None:
     findings = [
         FreshnessCheck().run(recent_values=[2.0, 2.0, 2.0, 2.0], historical_stdev=0.8, column="odds"),
         TemporalLeakageCheck().run(train_ts=[1, 2, 3, 9, 10], test_ts=[4, 5, 6]),
-        OverfitFlagsCheck().run(roi_in_sample=0.42, roi_holdout=-0.12, n_cells_scanned=677),
+        OverfitFlagsCheck().run(in_sample=0.42, holdout=-0.12, n_cells_scanned=677, abs_alarm=0.20, metric="ROI"),
     ]
     report = AuditReport(target="synthetic://demo-metric", findings=findings)
     report.compute_verdict()

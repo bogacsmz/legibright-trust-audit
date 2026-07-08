@@ -1,0 +1,10 @@
+# Non-betting public datasets (Titanic + UCI Bike Sharing) — domain-generality proof.
+source:
+  type: sqlalchemy
+  config:
+    platform: sqlite
+    connect_uri: "sqlite:///${GENERALITY_DB}"
+    profiling: {enabled: false}
+sink:
+  type: datahub-rest
+  config: {server: "${DATAHUB_GMS_URL}", token: "${DATAHUB_GMS_TOKEN}"}

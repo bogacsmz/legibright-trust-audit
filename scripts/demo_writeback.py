@@ -44,7 +44,7 @@ def main() -> int:
 
     findings = [
         TemporalLeakageCheck().run(train_ts=train_ts, test_ts=test_ts),
-        OverfitFlagsCheck().run(roi_in_sample=0.40, roi_holdout=-0.12, n_cells_scanned=677),
+        OverfitFlagsCheck().run(in_sample=0.40, holdout=-0.12, n_cells_scanned=677, abs_alarm=0.20, metric="ROI"),
         CalibrationBiasCheck().run(predicted=implied, outcomes=outcomes),
     ]
     report = AuditReport(target=f"{DATASET} :: backtest_roi", findings=findings)

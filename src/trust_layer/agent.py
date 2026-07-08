@@ -61,14 +61,15 @@ class TrustLayerAgent:
                     urn, check_id=f.check, passed=not f.failed, detail=f.detail or f.headline
                 )
             )
-            # 2) tags — fast visible signal
-            for tag in f.suggested_tags:
-                written.append(self.client.add_tag(urn, tag))
-            # 3) incidents — hard failures the next person/agent inherits
+            # 2) incidents — hard failures the next person/agent inherits
             if f.severity is Severity.FAIL and f.suggested_incident:
                 written.append(
                     self.client.raise_incident(urn, f"[trust-layer] {f.check}", f.detail or f.headline)
                 )
+        # 3) tags — reconciled once so the graph reflects the LATEST verdict
+        #    (a now-clean asset drops a stale audit-failed tag)
+        current_tags = sorted({t for f in report.findings for t in f.suggested_tags})
+        written += self.client.reconcile_tags(urn, current_tags)
         return written
 
     def propagate_downstream(self, source_urn: str, get_downstreams) -> list[str]:

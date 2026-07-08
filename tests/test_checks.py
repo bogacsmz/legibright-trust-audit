@@ -29,7 +29,7 @@ def test_temporal_leakage_ok_on_clean_cut():
 
 
 def test_overfit_flags_fire_on_too_good():
-    f = OverfitFlagsCheck().run(roi_in_sample=0.42, roi_holdout=-0.12, n_cells_scanned=677)
+    f = OverfitFlagsCheck().run(in_sample=0.42, holdout=-0.12, n_cells_scanned=677, abs_alarm=0.20, metric="ROI")
     assert f.severity is Severity.FAIL
 
 
