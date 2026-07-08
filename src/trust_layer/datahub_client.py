@@ -131,11 +131,12 @@ class DataHubClient:
 
         return writeback.emit_assertion(self._graph, urn, check_id=check_id, passed=passed, detail=detail)
 
-    def raise_incident(self, urn: str, title: str, description: str) -> str:
-        """Open an ACTIVE incident → shows in the asset's Incidents tab."""
+    def set_incident(self, urn: str, check_id: str, active: bool, title: str, description: str):
+        """Idempotent incident lifecycle per (dataset, check): raise if active, resolve if not."""
         from . import writeback
 
-        return writeback.emit_incident(self._graph, urn, title=title, description=description)
+        return writeback.set_incident(self._graph, urn, check_id=check_id, active=active,
+                                      title=title, description=description)
 
 
 # ------------------------------------------------------------------------------

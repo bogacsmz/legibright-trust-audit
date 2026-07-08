@@ -59,6 +59,14 @@ def classify_sql(sql: str) -> SplitInfo:
         if re.search(pat, sql_l):
             return SplitInfo(SplitKind.RANDOM, why)
 
+    # guard against pathological SQL: sqlglot parse is super-linear on long JOIN chains, and
+    # this SQL comes from untrusted query history. Skip the parse for oversized/complex input
+    # (random markers were already scanned above; fall back to keyword-only temporal detection).
+    if len(sql) > 20000 or sql_l.count(" join ") > 8:
+        if any(f"{fn}(" in sql_l for fn in _RANDOM_FUNCS):
+            return SplitInfo(SplitKind.RANDOM, "random function present (SQL too complex to parse)")
+        return SplitInfo(SplitKind.UNKNOWN, "SQL too complex to parse safely — human review")
+
     try:
         tree = sqlglot.parse_one(sql)
     except Exception:

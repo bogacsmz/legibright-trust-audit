@@ -15,8 +15,8 @@ acryl-datahub 1.6 aspect classes.
 """
 from __future__ import annotations
 
+import hashlib
 import time
-import uuid
 
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.metadata import schema_classes as S
@@ -31,6 +31,11 @@ def _now_ms() -> int:
 
 def _stamp() -> S.AuditStampClass:
     return S.AuditStampClass(time=_now_ms(), actor=_ACTOR)
+
+
+def _det_id(kind: str, dataset_urn: str, check_id: str) -> str:
+    """Deterministic entity id per (dataset, check) so re-runs UPDATE, not duplicate."""
+    return hashlib.sha1(f"{kind}|{dataset_urn}|{check_id}".encode()).hexdigest()
 
 
 # tags this agent manages — reconciled on every audit so verdicts stay current
@@ -63,8 +68,10 @@ def reconcile_tags(graph, dataset_urn: str, current: list[str]) -> list[str]:
 
 
 def emit_assertion(graph, dataset_urn: str, *, check_id: str, passed: bool, detail: str) -> str:
-    """Create a CUSTOM/EXTERNAL assertion + a run result. Returns the assertion URN."""
-    assertion_urn = str(AssertionUrn(str(uuid.uuid4())))
+    """Create/UPDATE a CUSTOM/EXTERNAL assertion + append a run result. Idempotent: the
+    assertion entity is keyed on (dataset, check), so re-runs reuse it and accumulate run
+    events as history rather than spawning duplicate assertions."""
+    assertion_urn = str(AssertionUrn(_det_id("assertion", dataset_urn, check_id)))
     info = S.AssertionInfoClass(
         type=S.AssertionTypeClass.CUSTOM,
         description=f"[trust-layer:{check_id}] {detail}"[:800],
@@ -76,7 +83,7 @@ def emit_assertion(graph, dataset_urn: str, *, check_id: str, passed: bool, deta
 
     run = S.AssertionRunEventClass(
         timestampMillis=_now_ms(),
-        runId=f"trust-layer-{uuid.uuid4().hex[:8]}",
+        runId=f"trust-layer-{time.time_ns()}",   # run events are history; unique per run is fine
         asserteeUrn=dataset_urn,
         assertionUrn=assertion_urn,
         status=S.AssertionRunStatusClass.COMPLETE,
@@ -89,9 +96,21 @@ def emit_assertion(graph, dataset_urn: str, *, check_id: str, passed: bool, deta
     return assertion_urn
 
 
-def emit_incident(graph, dataset_urn: str, *, title: str, description: str) -> str:
-    """Open an ACTIVE incident on the dataset. Returns the incident URN."""
-    incident_urn = str(IncidentUrn(str(uuid.uuid4())))
+def set_incident(graph, dataset_urn: str, *, check_id: str, active: bool,
+                 title: str, description: str) -> str | None:
+    """Idempotent incident lifecycle per (dataset, check):
+      * active=True  → ACTIVE incident (deterministic URN → re-runs update, not duplicate).
+      * active=False → RESOLVE the incident ONLY if one already exists (so a check that flips
+        FAIL→OK closes its incident; a check that never failed creates no noise).
+    """
+    incident_urn = str(IncidentUrn(_det_id("incident", dataset_urn, check_id)))
+    if not active:
+        try:
+            if not graph.exists(incident_urn):
+                return None                      # nothing to resolve; no noise
+        except Exception:
+            return None
+    state = S.IncidentStateClass.ACTIVE if active else S.IncidentStateClass.RESOLVED
     info = S.IncidentInfoClass(
         type=S.IncidentTypeClass.CUSTOM,
         customType="honest-metrics-audit",
@@ -99,7 +118,7 @@ def emit_incident(graph, dataset_urn: str, *, title: str, description: str) -> s
         description=description[:1000],
         entities=[dataset_urn],
         created=_stamp(),
-        status=S.IncidentStatusClass(state=S.IncidentStateClass.ACTIVE, lastUpdated=_stamp()),
+        status=S.IncidentStatusClass(state=state, lastUpdated=_stamp()),
     )
     graph.emit_mcp(MetadataChangeProposalWrapper(entityUrn=incident_urn, aspect=info))
     return incident_urn

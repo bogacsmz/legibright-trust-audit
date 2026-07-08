@@ -35,7 +35,10 @@ class CalibrationBiasCheck(Check):
     ) -> Finding:
         n = len(predicted)
         if n != len(outcomes):
-            return Finding(self.id, Severity.OK, "calibration: mismatched inputs")
+            # a misaligned caller must NOT get a green calibration pass
+            return Finding(self.id, Severity.WARN,
+                           f"calibration NOT assessed — {n} predictions vs {len(outcomes)} outcomes",
+                           suggested_tags=["audit-warn"])
         if n < _MIN_N:
             # honest: too few rows to certify calibration either way (do NOT stamp OK)
             return Finding(self.id, Severity.WARN,

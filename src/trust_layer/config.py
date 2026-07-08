@@ -31,6 +31,15 @@ class Config:
     def require_gms(self) -> None:
         if not self.gms_url:
             raise RuntimeError("DATAHUB_GMS_URL not set — is the DataHub quickstart running?")
+        import urllib.request
+
+        try:  # fail fast with a friendly message instead of a deep SDK traceback
+            urllib.request.urlopen(self.gms_url.rstrip("/") + "/health", timeout=3)
+        except Exception:
+            raise RuntimeError(
+                f"DataHub GMS not reachable at {self.gms_url}. Start it with "
+                f"`bash scripts/quickstart_up.sh` (or set DATAHUB_GMS_URL)."
+            )
 
     @property
     def odds_db(self) -> str:

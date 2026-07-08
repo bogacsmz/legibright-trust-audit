@@ -27,6 +27,11 @@ class NullSpikeCheck(Check):
         abs_jump_fail: float = 0.20,
         z_alarm: float = 3.0,
     ) -> Finding:
+        if current_n < 20:
+            # can't assess a spike from an ~empty window — do NOT fabricate a z=1000 FAIL
+            return Finding(self.id, Severity.WARN,
+                           f"{column} null-spike NOT assessed — only {current_n} current rows",
+                           metrics={"current_n": current_n})
         jump = current_null_rate - baseline_null_rate
         # two-proportion z (current vs baseline as the reference proportion)
         p0 = min(max(baseline_null_rate, 1e-6), 1 - 1e-6)
