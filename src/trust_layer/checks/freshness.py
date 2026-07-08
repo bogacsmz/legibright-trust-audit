@@ -1,13 +1,16 @@
 """Sentinel check: statistical freshness / silent-staleness detection.
 
-Why this is NOT what DataHub already ships: DataHub's out-of-box freshness assertions
-check "did the table get written recently". They CANNOT catch a feed that keeps
-updating rows on schedule but whose *values have frozen* — the exact failure mode we
-hit in production (a betting odds feed that kept its heartbeat but stopped moving).
+Positioning (originality criterion): this is a SUPPORTING layer, not a rewrite of
+DataHub. DataHub already ships freshness assertions + column profiling; the Sentinel
+*consumes* those (write-timestamp status, historical stdev from the profile) and adds
+the one signal they lack — value dynamics.
 
-This check looks at value dynamics, not just write timestamps: if a column that should
-vary across snapshots has gone flat (near-zero dispersion over the recent window while
-historically it moved), that's silent staleness.
+The gap it fills: DataHub's freshness says "did the table get written recently". It stays
+GREEN for a feed that keeps updating rows on schedule but whose *values froze* — the exact
+failure mode we hit in production (a betting odds feed that kept its heartbeat but stopped
+moving). The Sentinel flags that by watching dispersion, not just write time. The STAR of
+this project is the Auditor (honest-metrics); the Sentinel is the supporting cast that
+surfaces bad *source* data before the Auditor judges the *metric* built on it.
 """
 from __future__ import annotations
 

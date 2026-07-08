@@ -3,26 +3,31 @@
 **Hedef: erken submit ~5 Ağu** (5 gün buffer). Kapsam ilkesi (rubrik): küçük + çalışır + cilalı.
 Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sentinel + Auditor).
 
+## Jüri-kriter hizalaması (8 Tem — bu plan buna göre)
+1. **Originality (en kritik):** Auditor YILDIZ (leakage/overfit/calibration — DataHub'da yok).
+   Sentinel "extend" konumunda (DataHub profiling+freshness'ı okur, üstüne value-dynamics katar).
+   README/demo/kod yorumları hep Auditor'ı öne çıkarıyor.
+2. **Use of DataHub:** geri-yazma görünür — Assertion+Incident+Tag canlı GMS'e yazılıyor (✅ doğrulandı).
+3. **Real-World Usefulness:** README pratisyen-acısı cümlesiyle açılıyor; örnek = gerçek veride sahte edge.
+4. **OSS bonus:** Auditor registry-paketli (`honest_metrics/registry.py`); plan `docs/OSS_CONTRIBUTION.md`.
+5. **Submission Quality:** `demo/scenario.md` 3-dk akış hazır; README kurulum adımları net.
+6. **Technical Execution:** 8/8 test, canlı uçtan-uca çalışıyor.
+
 ## Faz 0 — Scaffold (8 Tem) ✅ TAMAM
-- Repo yapısı, Apache-2.0, pyproject, config, MCP/SDK bağlantı katmanı.
-- Statistical core: freshness + temporal-leakage + overfit checks — **gerçek, test edilmiş**.
-- `trust-layer selftest` çalışıyor, 6/6 pytest yeşil. Milestone-1 script + quickstart + demo script.
+- Repo, Apache-2.0, pyproject, MCP/SDK katmanı. Statistical core gerçek+test edilmiş.
 
-## Faz 1 — Uçtan uca canlı (9–14 Tem) → **Milestone 1 & 2**
-- **M1 (9-10 Tem):** Docker başlat → `datahub docker quickstart` → local DataHub ayağa kalk.
-  İddaa snaps tablosunu ingest et → `milestone1.py` gerçek şemayı okusun (placeholder değil,
-  gerçek son-değerleri query'leyip freshness koştursun). **Kabul: canlı DataHub'dan hüküm kartı.**
-- **M2 (11-14 Tem):** Write-back'i bağla — `add_tags` + structured property (MCP mutation,
-  doğrulandı). Lineage stamp (raw→analytics→metric). Downstream propagation çalışsın.
-  Assertions/Incidents SDK emit'ini netleştir (docs muğlaktı — SDK sürümüne karşı doğrula;
-  tag+property zaten "write-back" şartını karşılıyor, bunlar fidelity artışı).
+## Faz 1 — Uçtan uca canlı (8 Tem) ✅ TAMAM (M1 + M2 aynı gün bitti)
+- **M1 ✅:** DataHub quickstart ayakta; iddaa + tr_odds ingest; `milestone1.py` canlı okuma → verdict.
+- **M2 ✅:** `writeback.py` — Assertion(CUSTOM/EXTERNAL)+Incident(ACTIVE)+Tag canlı GMS'e yazıp
+  geri okundu. `demo_writeback.py` 30.352 gerçek maçta Auditor koşup verdict'i graph'a yazıyor
+  (🔴 NOT TRUSTWORTHY: leakage+overfit yakalandı, calibration doğru geçti).
 
-## Faz 2 — Moat derinliği (15–22 Tem)
-- Auditor'ı gerçek pipeline verimize bağla: `claim → lineage/query-history → split bul →
-  leakage+overfit+calibration` zinciri. Kalibrasyon + çoklu-test check'lerini ekle (mevcut
-  tr-spor-value/tjk-sib kodundan damıt).
-- Sentinel'e distribution-drift (PSI/KS), null-spike, schema-drift check'leri.
-- Her check için unit test. **Kabul: gerçek 250k satırda sahte-edge'i canlı yakalıyor.**
+## Faz 2 — Moat derinliği (9–22 Tem)  ← ŞİMDİ BURADAYIZ
+- Auditor'ı MCP'den otomatik besle: `claim → lineage/query-history → split çıkar` (şu an split
+  demo script'te elle kuruluyor; MCP get_dataset_queries ile otomatikleştir).
+- Sentinel'e distribution-drift (PSI/KS) + null-spike + schema-drift ekle (extend konumu koru).
+- Auditor'ı DataHub Skill olarak paketle (OSS bonus, `docs/OSS_CONTRIBUTION.md`).
+- **Kabul: gerçek 250k satırda sahte-edge'i canlı yakalıyor.** ✅ (kısmen — demo_writeback çalışıyor)
 
 ## Faz 3 — Demo + cila (23–31 Tem)
 - Demo ortamını kur (seed script: donmuş feed + sahte +40% ROI metriği + temiz kontrol metrik).

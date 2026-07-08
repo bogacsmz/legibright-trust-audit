@@ -1,61 +1,63 @@
-# Statistical Trust Layer — a DataHub agent that catches the backtest that's lying to you
+# Honest Metrics Auditor — a DataHub agent that tells you whether to trust a model
 
-> **Build with DataHub: The Agent Hackathon** submission · Challenge: *Agents That Do Real Work*
-> Deadline 10 Aug 2026. License: Apache-2.0.
+> **Build with DataHub: The Agent Hackathon** · Challenge: *Agents That Do Real Work* · Apache-2.0
+> Deadline 10 Aug 2026.
 
-An agent that reads DataHub through the **MCP Server**, runs statistical audits generic
-tools skip, and **writes verdicts back into the graph** (tags, structured properties,
-incidents) so the next person or agent inherits the knowledge.
+**Before an ML/data team trusts a model, this agent automatically audits whether the model
+actually works — or whether it just fits stale data (overfit / temporal leakage).** It reads
+the model's dataset and lineage from DataHub via the **MCP Server**, runs the statistical
+honesty tests that a plain "look, it's profitable!" backtest hides, and **writes the verdict
+back into the DataHub graph** as an Assertion + Incident + Tag — so the whole team inherits it.
 
-Two layers:
+## The star: the Auditor (this is the original part)
+DataHub already ships freshness/volume assertions, profiling, and incidents. It does **not**
+ship *statistical honesty*. That's what we add on top:
 
-- **Sentinel (data health)** — catches *silent* failures DataHub's built-in freshness
-  can't: a feed that keeps its write-heartbeat but whose **values froze** (statistical
-  freshness / distribution drift / null spikes / schema drift), then walks lineage to tag
-  contaminated downstreams and opens an incident.
-- **Auditor (honest metrics) — our moat.** Given a metric/backtest claim ("+40% ROI"),
-  it decides whether the number is *trustworthy*: temporal-leakage / random-split detection,
-  overfit red flags (ROI>20%, in-sample≫holdout), multiple-testing luck, calibration bias.
-  Verdict: 🟢 TRUSTWORTHY / 🟡 INCONCLUSIVE / 🔴 NOT TRUSTWORTHY — stamped onto the asset.
+| Auditor check | The lie it catches (that a single ROI number hides) |
+|---|---|
+| **Temporal leakage** | training rows dated after the test cutoff — a random split wearing a walk-forward costume; the model "saw the future" |
+| **Overfit red flags** | implausible in-sample ROI, in-sample ≫ holdout, multiple-testing luck (N cells scanned → expected false winners) |
+| **Calibration / favorite-longshot bias** | systematic probability miscalibration a good-looking accuracy score papers over |
 
-## Why this wins (not just another AI agent)
-Everyone can wire an LLM to MCP. The differentiator is **domain honesty**: this protocol
-is distilled from two production betting-model pipelines (**250k+ rows of real odds+results**)
-where it honestly **killed 10+ "profitable-looking" strategies**. DataHub ships freshness
-and assertions; it does **not** ship statistical honesty. That's the layer we add on top.
+Verdict: 🟢 TRUSTWORTHY / 🟡 INCONCLUSIVE / 🔴 NOT TRUSTWORTHY — stamped onto the asset in DataHub.
 
-The demo runs on that **real data**, live — the Auditor catches a fake edge on camera.
+The supporting cast: a **Sentinel** that *extends* DataHub's freshness (it consumes DataHub's
+profiling + write-time status and adds value-dynamics to catch a feed that's silently frozen),
+then walks lineage to tag contaminated downstreams. Sentinel guards the *source*; the Auditor
+judges the *metric* built on it.
 
-## Architecture
-```
-        ┌────────────── DataHub (local OSS quickstart) ──────────────┐
-        │  datasets · schema · lineage · query history · assertions  │
-        └───────▲───────────────────────────────────────▲───────────┘
-                │ READ (MCP: search/get_lineage/                │ WRITE-BACK
-                │       list_schema_fields/get_dataset_queries) │ (add_tags,
-                │                                               │  structured props,
-        ┌───────┴───────────────────────────────────────┐      │  incidents, assertions)
-        │              TrustLayerAgent                    │──────┘
-        │  Sentinel checks  +  Auditor checks (pure stats)│
-        │  → Finding → Verdict card → graph write-back     │
-        └──────────────────────────────────────────────────┘
-```
-- `src/trust_layer/checks/` — pure, unit-tested statistical checks (no DataHub dep).
-- `src/trust_layer/datahub_client.py` — SDK read + write-back; MCP tool names documented.
-- `src/trust_layer/agent.py` — orchestration + lineage propagation.
-- `ingest/` — DataHub recipes to load our real SQLite odds tables.
-- `demo/scenario.md` — the ≤3-min video script.
+## Why this isn't just another AI+MCP agent
+The moat is domain honesty. This exact protocol is distilled from two production betting-model
+pipelines — **250k+ rows of real odds+results** — where it honestly **killed 10+ "profitable-
+looking" strategies**. The demo runs on that real data: the Auditor catches a fake +40% ROI edge
+live, and you watch the AUDIT FAILED verdict appear in the DataHub UI.
+
+## Contribute back to the graph (verified live)
+On a verdict the agent emits, against live GMS:
+- a **CUSTOM/EXTERNAL Assertion** + run result (SUCCESS/FAILURE) → DataHub's Data-Quality tab,
+- an **ACTIVE Incident** with the failure detail → the asset's Incidents tab,
+- **Tags** (`audit-failed`, `contaminated-upstream`) → fast visible signal.
+
+`src/trust_layer/writeback.py` is verified end-to-end (write → read-back) on DataHub 1.6.
 
 ## Quickstart
 ```bash
 pip install -e .
-bash scripts/quickstart_up.sh          # local DataHub at :9002 / :8080
-python ingest/sqlite_to_datahub.py      # load a real odds table
-python scripts/milestone1.py            # end-to-end: read one dataset's health
-trust-layer selftest                    # statistical core, no DataHub needed
+bash scripts/quickstart_up.sh                       # local DataHub :9002 / :8080
+IDDAA_DB=/path/iddaa_snap.db datahub ingest -c ingest/recipes/iddaa.yml
+python scripts/milestone1.py                         # read a dataset's health end-to-end
+trust-layer selftest                                 # statistical core, no DataHub needed
+python scripts/demo_writeback.py                     # emit a live verdict → see it in the UI
 ```
-MCP wiring for judges: `scripts/mcp_config.json`.
+MCP wiring for judges (drive it from Claude/Cursor): `scripts/mcp_config.json`.
+
+## Layout
+- `src/trust_layer/checks/honest_metrics/` — **the Auditor** (registry-packaged for OSS reuse)
+- `src/trust_layer/checks/freshness.py` — the Sentinel (extends DataHub, supporting)
+- `src/trust_layer/writeback.py` — Assertion + Incident + Tag emission (live-verified)
+- `src/trust_layer/agent.py` — orchestration + lineage propagation
+- `ingest/`, `demo/scenario.md`, `docs/PLAN.md`, `docs/OSS_CONTRIBUTION.md`
 
 ## Status
-Milestone 0 (scaffold + statistical core + tests) ✅ — `trust-layer selftest` prints a
-real verdict card; `pytest` green. See `docs/PLAN.md` for the 34-day plan.
+M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ (Assertion+Incident+Tag land in GMS).
+Next: demo seed + honest-metrics run on real data. See `docs/PLAN.md`.

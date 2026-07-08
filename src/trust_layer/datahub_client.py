@@ -77,21 +77,24 @@ class DataHubClient:
         return [u.dataset for u in (up.upstreams or [])]
 
     # ---------- WRITE-BACK (the "contribute back to the graph" surface) ----------
-    def add_tag(self, urn: str, tag: str) -> None:
-        """Tag a dataset, e.g. 'contaminated', 'audit-failed'. Mirrors MCP add_tags."""
-        _emit_tag(self._graph, urn, tag)
+    # All three are LIVE-VERIFIED against DataHub GMS; see trust_layer/writeback.py.
+    def add_tag(self, urn: str, tag: str) -> str:
+        """Tag a dataset, e.g. 'contaminated-upstream', 'audit-failed'."""
+        from . import writeback
 
-    def set_structured_property(self, urn: str, prop: str, value: Any) -> None:
-        """Attach a structured verdict, e.g. audit.verdict='FAILED: temporal leakage'."""
-        _emit_structured_property(self._graph, urn, prop, value)
+        return writeback.emit_tag(self._graph, urn, tag)
 
-    def raise_incident(self, urn: str, title: str, description: str) -> None:
-        """Open a DataHub Incident (SDK-only; higher fidelity than a tag)."""
-        _emit_incident(self._graph, urn, title, description)
+    def emit_assertion_result(self, urn: str, check_id: str, passed: bool, detail: str) -> str:
+        """CUSTOM/EXTERNAL assertion + run result → lives in DataHub's Data-Quality tab."""
+        from . import writeback
 
-    def emit_assertion_result(self, urn: str, assertion_id: str, passed: bool, info: str) -> None:
-        """Emit an external assertion + its run result against a dataset."""
-        _emit_assertion(self._graph, urn, assertion_id, passed, info)
+        return writeback.emit_assertion(self._graph, urn, check_id=check_id, passed=passed, detail=detail)
+
+    def raise_incident(self, urn: str, title: str, description: str) -> str:
+        """Open an ACTIVE incident → shows in the asset's Incidents tab."""
+        from . import writeback
+
+        return writeback.emit_incident(self._graph, urn, title=title, description=description)
 
 
 # ------------------------------------------------------------------------------
@@ -111,35 +114,4 @@ def _upstream_lineage_type():  # pragma: no cover
     return UpstreamLineageClass
 
 
-def _emit_tag(graph, urn: str, tag: str) -> None:  # pragma: no cover
-    from datahub.metadata.schema_classes import (
-        GlobalTagsClass,
-        TagAssociationClass,
-    )
-
-    existing = graph.get_aspect(urn, aspect_type=GlobalTagsClass) or GlobalTagsClass(tags=[])
-    tag_urn = f"urn:li:tag:{tag}"
-    if all(t.tag != tag_urn for t in existing.tags):
-        existing.tags.append(TagAssociationClass(tag=tag_urn))
-    graph.emit_mcp(_wrap_aspect(urn, existing))
-
-
-def _emit_structured_property(graph, urn: str, prop: str, value) -> None:  # pragma: no cover
-    # TODO(build-week): confirm StructuredPropertiesClass shape for installed SDK.
-    raise NotImplementedError("structured property emit — wire in build week (day 2-3)")
-
-
-def _emit_incident(graph, urn: str, title: str, description: str) -> None:  # pragma: no cover
-    # TODO(build-week): IncidentInfoClass emit; MCP does not expose incidents.
-    raise NotImplementedError("incident emit — wire in build week (day 4)")
-
-
-def _emit_assertion(graph, urn, assertion_id, passed, info) -> None:  # pragma: no cover
-    # TODO(build-week): AssertionInfo(type=EXTERNAL) + AssertionRunEvent result.
-    raise NotImplementedError("assertion emit — wire in build week (day 4)")
-
-
-def _wrap_aspect(urn: str, aspect):  # pragma: no cover
-    from datahub.emitter.mcp import MetadataChangeProposalWrapper
-
-    return MetadataChangeProposalWrapper(entityUrn=urn, aspect=aspect)
+# (write-back construction lives in trust_layer/writeback.py — live-verified against GMS)

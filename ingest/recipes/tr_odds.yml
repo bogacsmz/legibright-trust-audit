@@ -1,0 +1,18 @@
+# DataHub ingestion recipe: football closing odds + Pinnacle reference (SQLite).
+# The Auditor's demo target: a real 33k-match backtest dataset with true temporal structure.
+# Run: datahub ingest -c ingest/recipes/tr_odds.yml
+
+source:
+  type: sqlalchemy
+  config:
+    platform: sqlite
+    connect_uri: "sqlite:///${TR_ODDS_DB}"
+    include_views: true
+    profiling:
+      enabled: false   # SQLite NullPool rejects pool args; our checks own the stats
+
+sink:
+  type: datahub-rest
+  config:
+    server: "${DATAHUB_GMS_URL}"
+    token: "${DATAHUB_GMS_TOKEN}"

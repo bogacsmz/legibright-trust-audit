@@ -46,23 +46,30 @@ class TrustLayerAgent:
             self._write_back(target_urn, report)
         return report
 
-    def _write_back(self, urn: str, report: AuditReport) -> None:
-        # 1) verdict as a structured property (graph-native, machine-readable)
-        try:
-            self.client.set_structured_property(urn, "audit.verdict", report.verdict.value)
-        except NotImplementedError:
-            pass  # wired in build week; tags below already satisfy write-back
-        # 2) tags from findings
+    def _write_back(self, urn: str, report: AuditReport) -> list[str]:
+        """Materialize the verdict as graph-native artifacts (Assertion + Tag + Incident).
+
+        Every check becomes a DataHub assertion run (SUCCESS/FAILURE) so the verdict lives
+        in the native Data-Quality surface with history; FAILs also raise an incident and
+        stamp tags. Returns the URNs written (handy for the demo to deep-link the UI).
+        """
+        written: list[str] = []
         for f in report.findings:
+            # 1) assertion run — the verdict in DataHub's own Data-Quality tab
+            written.append(
+                self.client.emit_assertion_result(
+                    urn, check_id=f.check, passed=not f.failed, detail=f.detail or f.headline
+                )
+            )
+            # 2) tags — fast visible signal
             for tag in f.suggested_tags:
-                self.client.add_tag(urn, tag)
-        # 3) incidents for hard failures
-        for f in report.findings:
+                written.append(self.client.add_tag(urn, tag))
+            # 3) incidents — hard failures the next person/agent inherits
             if f.severity is Severity.FAIL and f.suggested_incident:
-                try:
+                written.append(
                     self.client.raise_incident(urn, f"[trust-layer] {f.check}", f.detail or f.headline)
-                except NotImplementedError:
-                    pass
+                )
+        return written
 
     def propagate_downstream(self, source_urn: str, get_downstreams) -> list[str]:
         """When a source FAILs, tag downstreams 'contaminated' via lineage."""

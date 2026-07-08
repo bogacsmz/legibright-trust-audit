@@ -33,6 +33,29 @@ def test_overfit_flags_fire_on_too_good():
     assert f.severity is Severity.FAIL
 
 
+def test_calibration_flags_longshot_bias():
+    from trust_layer.checks.honest_metrics.calibration_bias import CalibrationBiasCheck
+    # low predicted prob but high realized (longshots over-priced) + favorites under
+    predicted = [0.1] * 60 + [0.9] * 60
+    outcomes = [1] * 30 + [0] * 30 + [0] * 40 + [1] * 20  # low bin realizes .5, high bin .33
+    f = CalibrationBiasCheck().run(predicted, outcomes, n_bins=5)
+    assert f.severity is Severity.FAIL
+    assert "bias" in f.headline.lower()
+
+
+def test_calibration_ok_when_sharp():
+    from trust_layer.checks.honest_metrics.calibration_bias import CalibrationBiasCheck
+    import random
+    random.seed(0)
+    predicted, outcomes = [], []
+    for _ in range(5000):  # enough to keep per-bin sampling noise below the ECE threshold
+        p = random.random()
+        predicted.append(p)
+        outcomes.append(1 if random.random() < p else 0)
+    f = CalibrationBiasCheck().run(predicted, outcomes, n_bins=5)
+    assert f.severity is Severity.OK
+
+
 def test_verdict_aggregation():
     report = AuditReport(
         target="x",
