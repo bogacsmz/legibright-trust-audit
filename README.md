@@ -21,10 +21,17 @@ ship *statistical honesty*. That's what we add on top:
 
 Verdict: 🟢 TRUSTWORTHY / 🟡 INCONCLUSIVE / 🔴 NOT TRUSTWORTHY — stamped onto the asset in DataHub.
 
-The supporting cast: a **Sentinel** that *extends* DataHub's freshness (it consumes DataHub's
-profiling + write-time status and adds value-dynamics to catch a feed that's silently frozen),
-then walks lineage to tag contaminated downstreams. Sentinel guards the *source*; the Auditor
-judges the *metric* built on it.
+The supporting cast: a **Sentinel** data-health suite that *extends* DataHub (each check reads
+what DataHub already knows and adds the temporal/baseline layer it doesn't ship):
+
+| Sentinel check | Reads from DataHub | Adds |
+|---|---|---|
+| freshness | write-time status + profile stdev | value-dynamics: a feed that updates on schedule but froze |
+| distribution-drift | column distribution profiles | PSI + KS drift vs baseline (point-in-time profile can't) |
+| null-spike | per-column null counts | anomaly test: is today's null rate an abnormal spike |
+| schema-drift | SchemaMetadata | breaking-change diff: dropped/retyped columns |
+
+Sentinel guards the *source*; the Auditor judges the *metric* built on it.
 
 ## Why this isn't just another AI+MCP agent
 The moat is domain honesty. This exact protocol is distilled from two production betting-model

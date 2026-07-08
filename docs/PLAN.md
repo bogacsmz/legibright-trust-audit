@@ -22,12 +22,15 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
   geri okundu. `demo_writeback.py` 30.352 gerçek maçta Auditor koşup verdict'i graph'a yazıyor
   (🔴 NOT TRUSTWORTHY: leakage+overfit yakalandı, calibration doğru geçti).
 
-## Faz 2 — Moat derinliği (9–22 Tem)  ← ŞİMDİ BURADAYIZ
-- Auditor'ı MCP'den otomatik besle: `claim → lineage/query-history → split çıkar` (şu an split
-  demo script'te elle kuruluyor; MCP get_dataset_queries ile otomatikleştir).
-- Sentinel'e distribution-drift (PSI/KS) + null-spike + schema-drift ekle (extend konumu koru).
-- Auditor'ı DataHub Skill olarak paketle (OSS bonus, `docs/OSS_CONTRIBUTION.md`).
-- **Kabul: gerçek 250k satırda sahte-edge'i canlı yakalıyor.** ✅ (kısmen — demo_writeback çalışıyor)
+## Faz 2 — Moat derinliği (9–22 Tem)
+- **Adım 2 ✅ (8 Tem):** Auditor MCP'den otomatik besleniyor — `split_inference.py` query
+  history SQL'ini sqlglot ile TEMPORAL/RANDOM sınıflıyor; `mcp_server.py` Auditor'ı MCP tool
+  olarak sunuyor (audit_dataset). Elle timestamp yok.
+- **Adım 3 ✅ (8 Tem):** Sentinel suite genişledi — distribution-drift (PSI/KS) + null-spike +
+  schema-drift, hepsi "extend" konumunda (DataHub profile/schema okur, üstüne katar).
+  `sentinel_scan.py` gerçek DataHub şeması + gerçek oran verisinde çalışıyor. Sentinel registry.
+- **Sıradaki:** Auditor+Sentinel'i DataHub Skill olarak paketle (OSS bonus, `docs/OSS_CONTRIBUTION.md`).
+- Kabul: gerçek veride sahte-edge'i + veri-sağlığı sorunlarını canlı yakalıyor ✅. 25/25 test.
 
 ## Faz 3 — Demo + cila (23–31 Tem)
 - Demo ortamını kur (seed script: donmuş feed + sahte +40% ROI metriği + temiz kontrol metrik).
