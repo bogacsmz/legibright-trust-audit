@@ -6,12 +6,27 @@
 > **Build with DataHub: The Agent Hackathon** · Category: *Agents That Do Real Work* · Apache-2.0
 > Repo: https://github.com/bogacsmz/legibright-trust-audit
 
+> *Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.*
+>
+> 🔍 **13 bugs found in ourselves — and fixed** across a 3-round adversarial self-audit + demo prep, nothing
+> loosened to go green. The one honesty tool that survives its own honesty test → [`docs/VERIFICATION.md`](VERIFICATION.md).
+
 ## Elevator pitch
 AI agents now write the SQL, build the pipeline, and train the model — but nobody audits whether
 the model they ship is *trustworthy* or just an overfit lie that looks great on paper. **Legibright
 is the agent that audits statistical honesty** — temporal/target/group leakage, overfit, calibration —
 and writes its verdict back into DataHub as an incident, tags, a 0–100 Trust Score, and a deprecation
 proposal. It's not a text-to-SQL agent; it does the one thing DataHub's shipped tools don't.
+
+## Why it's "Agents That Do Real Work"
+*Does it do real, autonomous, useful work end-to-end?* Yes — the full loop runs with no human in the
+middle until the graph is already updated and a decision is queued:
+- **Reads** the dataset, lineage, and query history from DataHub over the **MCP Server** — real context, not a toy input.
+- **Decides** by running statistical-honesty checks (leakage / overfit / calibration) and computing a verdict + Trust Score.
+- **Acts on the graph** — opens an **Incident**, stamps **Tags**, writes the **Trust Score** as a typed property, files a **deprecation proposal**. These are native artifacts a data team already consumes, not a console print.
+- **Hands off** — the verdict is inherited by the next engineer *and* by other agents, which call Legibright as an **MCP tool**. Agent-to-agent, closed loop: **detect → write back → propose → hand off.**
+
+*Evidence:* [`src/trust_layer/agent.py`](../src/trust_layer/agent.py) · [`writeback.py`](../src/trust_layer/writeback.py) · [`mcp_server.py`](../src/trust_layer/mcp_server.py) · run it: [`demo/run_demo.sh`](../demo/run_demo.sh).
 
 ## The problem
 DataHub tells you if the *data* is fresh, complete, and profiled. Nothing tells you if a *number*
@@ -33,56 +48,45 @@ audits a logged `backtest_roi = +40%` claim and, in one run:
 Then it proves it doesn't cry wolf: an honest model (Bike Sharing) passes 🟢 **100/100**, a leaky one
 (Titanic) fails 🔴 — on public datasets unrelated to betting.
 
-**Trust ≠ accuracy.** Legibright scores *honesty*, not performance: a bike-demand model that's only
-~57% accurate but *honestly* 57% (clean split, no overfit) earns Trust Score 100, while a leaky
-"40% ROI winner" earns 28. It rewards the modest-but-honest number and punishes the impressive lie —
-the opposite of what an accuracy dashboard does.
+> ### Trust ≠ accuracy
+> Legibright scores **honesty, not performance**. A bike-demand model that's only ~57% accurate but
+> *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a leaky "+40% ROI winner" earns
+> **28**. It rewards the modest-but-honest number and punishes the impressive lie — the opposite of
+> what an accuracy dashboard does.
 
 ---
 
-## How it scores on the six criteria (each with evidence)
+## How it scores on the six criteria (one line + clickable evidence)
 
-**1 · Use of DataHub — deep, native, write-back.**
-MCP tool (`audit_dataset(urn)`, any agent can call) · installs as the **6th DataHub Skill** beside the
-official five (setup/search/lineage/enrich/quality) · writes native **Assertion + Incident + Tag +
-Structured Property (Trust Score)** + a **Deprecation proposal** · sets the agent's **avatar** in the
-graph. Built on the **Agent Context Kit**; extends the canonical **Data Quality Agent** pattern.
-*Evidence:* `src/trust_layer/writeback.py`, `datahub_client.py`, `skills/datahub-trust-audit/`,
-`.claude-plugin/`. Verified write→read-back on DataHub 1.6.
+**1 · Use of DataHub — deep, native, write-back.** Reads over MCP and *writes back* native Assertion +
+Incident + Tag + Trust Score property + a deprecation proposal + agent avatar; installs as the 6th
+DataHub Skill; built on the Agent Context Kit, extends the Data Quality Agent pattern.
+→ [`writeback.py`](../src/trust_layer/writeback.py) · [`datahub_client.py`](../src/trust_layer/datahub_client.py) · [`skills/`](../skills/datahub-trust-audit/) · [`.claude-plugin/`](../.claude-plugin/)
 
-**2 · Technical Execution — tested and reproducible.**
-51/51 unit tests + a 16/16 adversarial regression suite (`scripts/verify_all.py`). Write-back is
-**idempotent** (deterministic entity keys → re-runs update, never duplicate) with incident lifecycle
-(resolves on FAIL→OK) and best-effort transactionality. Scales: on 250k rows, distribution-drift 1.1s,
-calibration 0.14s, target-leakage 3s, peak RSS ~323 MB. *Evidence:* `tests/`, `docs/VERIFICATION.md`.
+**2 · Technical Execution — tested & reproducible.** 51/51 unit tests + a 16/16 adversarial suite;
+idempotent write-back (deterministic keys, incident lifecycle); scales to 250k rows in seconds (~323 MB).
+→ [`verify_all.py`](../scripts/verify_all.py) · [`tests/`](../tests/) · [`VERIFICATION.md`](VERIFICATION.md)
 
-**3 · Originality — the layer DataHub doesn't ship.**
-DataHub ships freshness/volume/profiling. Legibright adds *statistical honesty*: temporal leakage
-(SQL-classified via sqlglot), target/group leakage, overfit collapse, and a sample-size-aware
-Hosmer–Lemeshow calibration test. **Extend, not rewrite** — it composes `datahub-search` and
-`datahub-quality`. *Evidence:* `src/trust_layer/checks/honest_metrics/`, `split_inference.py`.
+**3 · Originality — the layer DataHub doesn't ship.** Statistical honesty: temporal leakage (sqlglot),
+target/group leakage, overfit collapse, sample-size-aware Hosmer–Lemeshow calibration. Extend, not rewrite.
+→ [`checks/honest_metrics/`](../src/trust_layer/checks/honest_metrics/) · [`split_inference.py`](../src/trust_layer/split_inference.py)
 
-**4 · Real-World Usefulness — a market-validated need.**
-"Is this model trustworthy?" is a real, acquired need: **TruEra** (ML observability) was acquired by
-**Snowflake** (2024) and **Robust Intelligence** (AI validation) by **Cisco** (2024). Legibright puts
-that discipline *inside the catalog the whole team already uses*, as an agent, for free. *Evidence:*
-the closed loop above — detect → write back → propose fix — on real data.
+**4 · Real-World Usefulness — a market-validated need.** "Is this model trustworthy?" is an *acquired*
+need (TruEra→Snowflake, Robust Intelligence→Cisco, 2024); Legibright puts it inside the catalog, as an agent, on real data.
+→ the closed loop above · [`demo/SCRIPT.md`](../demo/SCRIPT.md)
 
-**5 · Submission Quality — this video + docs.**
-A ≤3-minute scripted demo (`demo/SCRIPT.md`), a reproducible driver (`demo/run_demo.sh`), a README
-with a clear "extend not rewrite" positioning, and an honest-limitations ledger. Consistent brand
-(Legibright, ✓-L mark).
+**5 · Submission Quality — video + docs.** Scripted ≤3-min demo, reproducible driver, honest-limits ledger, consistent brand.
+→ [`demo/SCRIPT.md`](../demo/SCRIPT.md) · [`run_demo.sh`](../demo/run_demo.sh) · [`VERIFICATION.md`](VERIFICATION.md)
 
-**6 · Bonus · Open source.**
-Apache-2.0. Contributes upstream: the **6th skill** (`datahub-trust-audit`, registry-format), an
-**RFC** for statistical-honesty assertions, and a **SQLite profiling docs fix**. *Evidence:*
-`docs/upstream/`, `docs/OSS_CONTRIBUTION.md`.
+**6 · Bonus · Open source.** Apache-2.0; contributes upstream a 6th skill, an RFC for statistical-honesty assertions, and a SQLite-profiling docs fix.
+→ [`docs/upstream/`](upstream/) · [`OSS_CONTRIBUTION.md`](OSS_CONTRIBUTION.md)
 
 ---
 
 ## Why we're different (one line)
 **We're not another text-to-SQL agent. We audit whether the number an agent produced is honest —
-the thing DataHub doesn't do — and write the verdict back into the graph.**
+the thing DataHub doesn't do — write the verdict back into the graph, and prove it by surviving our
+own 3-round adversarial audit (13 bugs found in ourselves, fixed).**
 
 ## Try it in 60 seconds
 ```bash

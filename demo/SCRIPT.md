@@ -10,7 +10,7 @@ semantic (🟢🟡🔴). Watermark `legibright-mark.svg` bottom-right throughout
 ---
 
 ### 0:00–0:18 · HOOK — the meta-position  *(title card → face/screen)*
-**ON-SCREEN:** `AI agents now write the SQL, build the pipeline, train the model.` → `But is the model they ship trustworthy — or an overfit lie that looks great on paper?` → `Who audits that? → Nobody.` → **Legibright.**
+**ON-SCREEN:** `AI agents now write the SQL, build the pipeline, train the model.` → `But is the model they ship trustworthy — or an overfit lie that looks great on paper?` → `Who audits that? → Nobody.` → **Legibright.** → *Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.*
 **VO:** "AI agents already write SQL, build pipelines, train models. But the model they hand you — is it trustworthy, or an overfit lie that looks perfect on paper? Who checks? Nobody does. That's Legibright."
 *Note: this is the wedge — everyone else at this hackathon is text-to-SQL. We audit the honesty of the result.*
 

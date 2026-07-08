@@ -4,20 +4,30 @@
 <p align="center">
   <b>A statistical trust layer that catches overfit &amp; data leakage in DataHub.</b>
 </p>
+<p align="center">
+  <i>Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.</i>
+</p>
+<p align="center">
+  🔍 <b>13 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo prep → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
+</p>
 
-# Statistical Trust Layer — a DataHub agent that tells you whether to trust a model
+# Statistical Trust Layer — an autonomous DataHub agent that audits whether a model can be trusted
 
-> **Build with DataHub: The Agent Hackathon** · Challenge: *Agents That Do Real Work* · Apache-2.0
-> Deadline 10 Aug 2026.
+> **Build with DataHub: The Agent Hackathon** · Category: **Agents That Do Real Work** · Apache-2.0 · Deadline 10 Aug 2026.
 >
 > Brand: **Legibright** — the "L" is a ✓ (checkmark), the audit/trust mark. Palette: indigo
 > `#1E1B4B` / `#4F46E5` / `#6366F1`. Assets in [`docs/assets/`](docs/assets/) (see `BRAND.md`).
 
-**Before an ML/data team trusts a model, this agent automatically audits whether the model
-actually works — or whether it just fits stale data (overfit / temporal leakage).** It reads
-the model's dataset and lineage from DataHub via the **MCP Server**, runs the statistical
-honesty tests that a plain "look, it's profitable!" backtest hides, and **writes the verdict
-back into the DataHub graph** as an Assertion + Incident + Tag — so the whole team inherits it.
+**Agents That Do Real Work — end to end.** Legibright is an autonomous agent, not a validation
+library. It reads a model's dataset and lineage from DataHub over the **MCP Server**, runs the
+statistical-honesty checks a "look, it's profitable!" backtest hides, and then *acts on the graph*:
+it opens an **Incident**, stamps **Tags**, writes a 0–100 **Trust Score** property, and files a
+**deprecation proposal** for a human to approve. Other agents invoke it as an MCP tool.
+**Closed loop: detect → write back → propose → hand off.**
+
+> **Trust ≠ accuracy.** Legibright scores *honesty*, not performance. A bike-demand model that's only
+> ~57% accurate but *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a leaky
+> "+40% ROI winner" earns **28**. It rewards the modest-but-honest number and punishes the impressive lie.
 
 ## Positioning: extend, don't rewrite
 This **extends DataHub's canonical Data Quality Agent pattern**. It composes the official
