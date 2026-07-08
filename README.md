@@ -32,6 +32,21 @@ pipelines — **250k+ rows of real odds+results** — where it honestly **killed
 looking" strategies**. The demo runs on that real data: the Auditor catches a fake +40% ROI edge
 live, and you watch the AUDIT FAILED verdict appear in the DataHub UI.
 
+## The agent does real work: auto-fed from DataHub, callable over MCP
+You don't hand it a split. Point it at a dataset URN and it **reads how the train/test split
+was actually built** from DataHub's query history (`get_dataset_queries`), classifies the SQL
+with sqlglot — TEMPORAL (clean) vs RANDOM/hash/TABLESAMPLE (leakage) — and judges the
+methodology at the source. Then it writes the verdict back.
+
+And it's exposed as an **MCP server** so any agent (Claude, Cursor, another pipeline) can call it:
+```
+python -m trust_layer.mcp_server         # tools: audit_dataset, classify_split_sql, list_auditor_skills
+```
+```bash
+python scripts/seed_queries.py leaky      # a data scientist logs a random-split query
+python scripts/audit_auto.py              # agent reads it, catches the leak, writes verdict — no hardcoded split
+```
+
 ## Contribute back to the graph (verified live)
 On a verdict the agent emits, against live GMS:
 - a **CUSTOM/EXTERNAL Assertion** + run result (SUCCESS/FAILURE) → DataHub's Data-Quality tab,

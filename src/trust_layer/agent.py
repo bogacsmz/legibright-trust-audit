@@ -46,6 +46,22 @@ class TrustLayerAgent:
             self._write_back(target_urn, report)
         return report
 
+    def audit_dataset_from_datahub(self, dataset_urn: str, extra: list[Finding] | None = None) -> AuditReport:
+        """AUTO-FED audit: the agent reads the split methodology from DataHub query history
+        (no hand-supplied timestamps), judges it, and adds any extra metric-level findings.
+
+        This is the "agent does real work" path: point it at a dataset URN and it discovers
+        how the split was built, decides trustworthiness, and writes the verdict back.
+        """
+        from .split_inference import finding_from_queries
+
+        findings: list[Finding] = []
+        queries = self.client.get_dataset_queries(dataset_urn) if self.client else []
+        if queries:
+            findings.append(finding_from_queries(queries))
+        findings.extend(extra or [])
+        return self.audit(dataset_urn, findings)
+
     def _write_back(self, urn: str, report: AuditReport) -> list[str]:
         """Materialize the verdict as graph-native artifacts (Assertion + Tag + Incident).
 

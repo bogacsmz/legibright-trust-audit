@@ -76,6 +76,41 @@ class DataHubClient:
             return []
         return [u.dataset for u in (up.upstreams or [])]
 
+    def get_dataset_queries(self, urn: str) -> list[str]:
+        """SQL statements in DataHub's query history that reference this dataset.
+
+        This is the auto-feed source for split inference — mirrors the MCP
+        `get_dataset_queries` tool, read here via the SDK for headless runs.
+        """
+        from datahub.metadata.schema_classes import QueryPropertiesClass, QuerySubjectsClass
+
+        out: list[str] = []
+        for qurn in self._graph.get_urns_by_filter(entity_types=["query"]):
+            subj = self._graph.get_aspect(qurn, QuerySubjectsClass)
+            if subj and any(s.entity == urn for s in (subj.subjects or [])):
+                props = self._graph.get_aspect(qurn, QueryPropertiesClass)
+                if props and props.statement:
+                    out.append(props.statement.value)
+        return out
+
+    def seed_query(self, dataset_urn: str, name: str, sql: str) -> str:
+        """Record a SQL query against a dataset in DataHub's query history (demo/seed)."""
+        import time
+        import uuid
+
+        from datahub.emitter.mcp import MetadataChangeProposalWrapper as MCP
+        from datahub.metadata import schema_classes as S
+        from datahub.metadata.urns import QueryUrn
+
+        qurn = str(QueryUrn(str(uuid.uuid4())))
+        now = S.AuditStampClass(time=int(time.time() * 1000), actor="urn:li:corpuser:datascientist")
+        self._graph.emit_mcp(MCP(entityUrn=qurn, aspect=S.QueryPropertiesClass(
+            statement=S.QueryStatementClass(value=sql, language="SQL"),
+            source="MANUAL", created=now, lastModified=now, name=name)))
+        self._graph.emit_mcp(MCP(entityUrn=qurn, aspect=S.QuerySubjectsClass(
+            subjects=[S.QuerySubjectClass(entity=dataset_urn)])))
+        return qurn
+
     # ---------- WRITE-BACK (the "contribute back to the graph" surface) ----------
     # All three are LIVE-VERIFIED against DataHub GMS; see trust_layer/writeback.py.
     def add_tag(self, urn: str, tag: str) -> str:

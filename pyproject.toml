@@ -6,8 +6,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dependencies = [
-    # DataHub: metadata graph read/write + local ingestion
+    # DataHub: metadata graph read/write + local ingestion (brings sqlglot too)
     "acryl-datahub>=0.15.0",
+    # expose the Auditor as an MCP server any agent can call
+    "mcp>=1.0",
+    # SQL parsing for split-methodology inference from query history
+    "sqlglot>=25",
     # stats for the honest-metrics moat (no heavy ML deps on purpose)
     "numpy>=1.26",
     "scipy>=1.11",
@@ -18,7 +22,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+# generality proof trains real models on public datasets
+dev = ["pytest>=8.0", "scikit-learn>=1.3", "pandas>=2.0"]
 
 [project.scripts]
 trust-layer = "trust_layer.cli:app"
