@@ -34,10 +34,14 @@ what DataHub already knows and adds the temporal/baseline layer it doesn't ship)
 Sentinel guards the *source*; the Auditor judges the *metric* built on it.
 
 ## Why this isn't just another AI+MCP agent
-The moat is domain honesty. This exact protocol is distilled from two production betting-model
-pipelines — **250k+ rows of real odds+results** — where it honestly **killed 10+ "profitable-
-looking" strategies**. The demo runs on that real data: the Auditor catches a fake +40% ROI edge
-live, and you watch the AUDIT FAILED verdict appear in the DataHub UI.
+The moat is domain honesty. The reproducible demo runs on **~12,900 real matches** of public
+football closing odds (Pinnacle + bookmakers, football-data.co.uk) that `fetch_data.py` downloads
+for you — the Auditor catches a fake +40% ROI edge live and you watch the AUDIT FAILED verdict
+appear in the DataHub UI. The protocol itself was distilled from the author's larger private
+betting pipelines (horse-racing + live football snapshots, ~250k rows in aggregate, not shipped)
+where this same honest-validation discipline repeatedly rejected profitable-looking-but-overfit
+edge candidates. Everything a judge runs here is public and reproducible; the private-data
+provenance is context, not a claim you have to take on faith.
 
 ## The agent does real work: auto-fed from DataHub, callable over MCP
 You don't hand it a split. Point it at a dataset URN and it **reads how the train/test split
@@ -62,16 +66,24 @@ On a verdict the agent emits, against live GMS:
 
 `src/trust_layer/writeback.py` is verified end-to-end (write → read-back) on DataHub 1.6.
 
-## Quickstart
+## Quickstart (fully reproducible from a clean clone)
 ```bash
-pip install -e .
-bash scripts/quickstart_up.sh                       # local DataHub :9002 / :8080
-IDDAA_DB=/path/iddaa_snap.db datahub ingest -c ingest/recipes/iddaa.yml
-python scripts/milestone1.py                         # read a dataset's health end-to-end
-trust-layer selftest                                 # statistical core, no DataHub needed
-python scripts/demo_writeback.py                     # emit a live verdict → see it in the UI
+pip install -e .                 # engine + CLI + MCP server (installs acryl-datahub[sqlalchemy])
+trust-layer selftest             # statistical core — no DataHub, no data needed (start here)
+
+python scripts/fetch_data.py     # download PUBLIC data → data/matches.db + data/generality.db
+bash scripts/quickstart_up.sh    # local DataHub at :9002 (UI) / :8080 (GMS), login datahub/datahub
+datahub ingest -c ingest/recipes/matches.yml       # ingest the public odds → main.matches
+
+python scripts/milestone1.py     # read a dataset's health from DataHub, end-to-end
+python scripts/demo_writeback.py # Auditor on real matches → live 🔴 verdict written to the UI
+python scripts/generality_check.py  # proof on Bike Sharing + Titanic (non-betting)
+python scripts/seed_queries.py leaky && python scripts/audit_auto.py  # auto-fed from query history
+
+pip install -e '.[dev]' && pytest -q                # run the test suite (25 tests)
 ```
 MCP wiring for judges (drive it from Claude/Cursor): `scripts/mcp_config.json`.
+Env: `datahub ingest` reads `MATCHES_DB` / `DATAHUB_GMS_URL` (both default sensibly; see `.env.example`).
 
 ## Layout
 - `src/trust_layer/checks/honest_metrics/` — **the Auditor** (registry-packaged for OSS reuse)

@@ -1,0 +1,12 @@
+# Public football closing odds (built by scripts/fetch_data.py) → main.matches.
+# Run: datahub ingest -c ingest/recipes/matches.yml
+# Requires: pip install -e .  (installs acryl-datahub[sqlalchemy])
+source:
+  type: sqlalchemy
+  config:
+    platform: sqlite
+    connect_uri: "sqlite:///${MATCHES_DB}"
+    profiling: {enabled: false}   # SQLite NullPool rejects profiler pool args (see docs/upstream)
+sink:
+  type: datahub-rest
+  config: {server: "${DATAHUB_GMS_URL}", token: "${DATAHUB_GMS_TOKEN}"}

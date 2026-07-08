@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dependencies = [
-    # DataHub: metadata graph read/write + local ingestion (brings sqlglot too)
-    "acryl-datahub>=0.15.0",
+    # DataHub: metadata graph read/write + SQLite ingestion (brings sqlglot too)
+    "acryl-datahub[sqlalchemy]>=0.15.0",
     # expose the Auditor as an MCP server any agent can call
     "mcp>=1.0",
     # SQL parsing for split-methodology inference from query history

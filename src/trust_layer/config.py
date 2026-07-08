@@ -12,19 +12,30 @@ try:
 except ImportError:  # dotenv optional at import time
     pass
 
+# repo-local public data built by scripts/fetch_data.py (reproducible defaults)
+_DATA = Path(__file__).resolve().parents[2] / "data"
+
 
 @dataclass(frozen=True)
 class Config:
     gms_url: str = os.getenv("DATAHUB_GMS_URL", "http://localhost:8080")
     gms_token: str = os.getenv("DATAHUB_GMS_TOKEN", "")
     mutation_enabled: bool = os.getenv("TOOLS_IS_MUTATION_ENABLED", "true").lower() == "true"
-    tjk_db: str = os.getenv("TJK_DB", "")
+    # public, reproducible demo data (fetch_data.py); override via env for other sources
+    matches_db: str = os.getenv("MATCHES_DB", str(_DATA / "matches.db"))
+    generality_db: str = os.getenv("GENERALITY_DB", str(_DATA / "generality.db"))
+    # optional author-private sources (not needed for any demo)
     tr_odds_db: str = os.getenv("TR_ODDS_DB", "")
     iddaa_db: str = os.getenv("IDDAA_DB", "")
 
     def require_gms(self) -> None:
         if not self.gms_url:
             raise RuntimeError("DATAHUB_GMS_URL not set — is the DataHub quickstart running?")
+
+    @property
+    def odds_db(self) -> str:
+        """The odds DB the demos read: private TR_ODDS_DB if set, else public matches.db."""
+        return self.tr_odds_db or self.matches_db
 
 
 CONFIG = Config()

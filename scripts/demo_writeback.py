@@ -33,7 +33,7 @@ def main() -> int:
     CONFIG.require_gms()
     from trust_layer.datahub_client import DataHubClient
 
-    dates, implied, outcomes = _load(CONFIG.tr_odds_db)
+    dates, implied, outcomes = _load(CONFIG.odds_db)
     print(f"[demo] audited claim: 'backtest_roi = +40%' on {len(dates)} real matches\n")
 
     # A RANDOM split (industry-common mistake): sort by a hash, not by time → future leaks.

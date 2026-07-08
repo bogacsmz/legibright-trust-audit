@@ -11,7 +11,7 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
 3. **Real-World Usefulness:** README pratisyen-acısı cümlesiyle açılıyor; örnek = gerçek veride sahte edge.
 4. **OSS bonus:** Auditor registry-paketli (`honest_metrics/registry.py`); plan `docs/OSS_CONTRIBUTION.md`.
 5. **Submission Quality:** `demo/scenario.md` 3-dk akış hazır; README kurulum adımları net.
-6. **Technical Execution:** 8/8 test, canlı uçtan-uca çalışıyor.
+6. **Technical Execution:** 25/25 test, canlı uçtan-uca çalışıyor.
 
 ## Faz 0 — Scaffold (8 Tem) ✅ TAMAM
 - Repo, Apache-2.0, pyproject, MCP/SDK katmanı. Statistical core gerçek+test edilmiş.

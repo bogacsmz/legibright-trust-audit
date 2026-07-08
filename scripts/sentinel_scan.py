@@ -44,7 +44,7 @@ def main() -> int:
     schema_finding = SchemaDriftCheck().run(BASELINE_SCHEMA, current_schema, dataset="main.matches")
 
     # 2) distribution-drift on real odds: early rows (baseline) vs late rows (current)
-    base_odds, curr_odds = _odds_by_period(CONFIG.tr_odds_db)
+    base_odds, curr_odds = _odds_by_period(CONFIG.odds_db)
     print(f"[sentinel] odds drift: baseline n={len(base_odds)} vs current n={len(curr_odds)}")
     drift_finding = DistributionDriftCheck().run(base_odds, curr_odds, column="psc_h")
 

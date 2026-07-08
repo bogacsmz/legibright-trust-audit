@@ -25,19 +25,23 @@ def main(urn: str | None = None) -> int:
     from trust_layer.datahub_client import DataHubClient
 
     client = DataHubClient()
-    # Real ingested dataset (sqlite schema is 'main'):
-    urn = urn or client.dataset_urn("sqlite", "main.snaps")
+    # Public reproducible dataset (built by fetch_data.py, ingested via recipes/matches.yml):
+    urn = urn or client.dataset_urn("sqlite", "main.matches")
 
     fields = client.get_schema_fields(urn)
     if not fields:
-        print(f"[milestone1] No schema for {urn}. Run: datahub ingest -c ingest/recipes/iddaa.yml")
+        print(f"[milestone1] No schema for {urn}. First run:\n"
+              f"  python scripts/fetch_data.py && datahub ingest -c ingest/recipes/matches.yml")
         return 1
     print(f"[milestone1] DataHub → read {len(fields)} fields from {urn}:")
     print("            " + ", ".join(f["fieldPath"] for f in fields))
 
-    # Pull the recent odds values for the '1' (home win) column from the source table,
-    # plus a historical stdev baseline, and run the real freshness check.
-    recent, hist_stdev, col = _sample_odds(CONFIG.iddaa_db, column="o1")
+    # Pull recent home-win closing odds from the source table + a historical stdev baseline,
+    # and run the real freshness check.
+    recent, hist_stdev, col = _sample_odds(CONFIG.odds_db, column="psc_h")
+    if not recent:
+        print(f"[milestone1] source table not found in {CONFIG.odds_db} — run fetch_data.py")
+        return 1
     print(f"[milestone1] source → {len(recent)} recent '{col}' values; hist σ={hist_stdev:.3f}")
 
     finding = FreshnessCheck().run(recent_values=recent, historical_stdev=hist_stdev, column=col)
@@ -48,14 +52,17 @@ def main(urn: str | None = None) -> int:
 
 
 def _sample_odds(db_path: str, column: str, recent_n: int = 40):
-    """Most-recent `column` values + a robust historical stdev, from the snaps table."""
-    conn = sqlite3.connect(db_path)
-    rows = [r[0] for r in conn.execute(
-        f"SELECT {column} FROM snaps WHERE {column} IS NOT NULL ORDER BY fetched_at DESC LIMIT ?",
-        (recent_n,))]
-    allvals = [r[0] for r in conn.execute(
-        f"SELECT {column} FROM snaps WHERE {column} IS NOT NULL")]
-    conn.close()
+    """Most-recent `column` values + a robust historical stdev, from the matches table."""
+    try:
+        conn = sqlite3.connect(db_path)
+        rows = [r[0] for r in conn.execute(
+            f"SELECT {column} FROM matches WHERE {column} IS NOT NULL ORDER BY date DESC LIMIT ?",
+            (recent_n,))]
+        allvals = [r[0] for r in conn.execute(
+            f"SELECT {column} FROM matches WHERE {column} IS NOT NULL")]
+        conn.close()
+    except sqlite3.OperationalError:
+        return [], 1.0, column   # table missing → caller handles gracefully
     hist = statistics.pstdev(allvals) if len(allvals) > 2 else 1.0
     return rows, hist, column
 

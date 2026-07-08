@@ -9,8 +9,8 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> Installing DataHub CLI (in a venv is fine)..."
-python3 -m pip install --quiet 'acryl-datahub[datahub-rest]'
+echo "==> Ensuring DataHub CLI + SQLite ingestion deps (matches 'pip install -e .')..."
+python3 -m pip install --quiet 'acryl-datahub[datahub-rest,sqlalchemy]'
 
 echo "==> Starting DataHub quickstart (this pulls images on first run)..."
 datahub docker quickstart
@@ -28,6 +28,6 @@ cat <<'EOF'
       DATAHUB_GMS_TOKEN=<create in UI: Settings → Access Tokens>
       TOOLS_IS_MUTATION_ENABLED=true
 
-==> Next: ingest a demo table:   python ingest/sqlite_to_datahub.py
+==> Next: ingest a demo table:   python scripts/fetch_data.py && datahub ingest -c ingest/recipes/matches.yml
     Then milestone 1:            python scripts/milestone1.py
 EOF
