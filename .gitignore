@@ -1,0 +1,18 @@
+# env & secrets
+.env
+*.token
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# data (demo dbs copied in at runtime; keep repo light)
+data/*.db
+*.duckdb
+
+# datahub quickstart
+docker-compose.override.yml

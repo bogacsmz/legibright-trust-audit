@@ -1,0 +1,19 @@
+# DataHub ingestion recipe: İddaa/Nesine/Pinnacle odds snapshots (SQLite).
+# Run: datahub ingest -c ingest/recipes/iddaa.yml
+# Env: DATAHUB_GMS_URL, DATAHUB_GMS_TOKEN must be set (see .env).
+
+source:
+  type: sqlite
+  config:
+    # sqlite via sqlalchemy; path from your local checkout of tr-spor-value
+    database: "${IDDAA_DB}"
+    include_views: true
+    profiling:
+      enabled: true          # gives us null counts / distributions to audit
+      profile_table_level_only: false
+
+sink:
+  type: datahub-rest
+  config:
+    server: "${DATAHUB_GMS_URL}"
+    token: "${DATAHUB_GMS_TOKEN}"

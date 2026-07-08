@@ -1,0 +1,14 @@
+{
+  "_comment": "Drop-in MCP config so a judge can point Claude/Cursor at their local DataHub and drive the agent. Mutation enabled so the agent can write verdicts back.",
+  "mcpServers": {
+    "datahub": {
+      "command": "uvx",
+      "args": ["mcp-server-datahub@latest"],
+      "env": {
+        "DATAHUB_GMS_URL": "http://localhost:8080",
+        "DATAHUB_GMS_TOKEN": "<your-local-token>",
+        "TOOLS_IS_MUTATION_ENABLED": "true"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+[project]
+name = "statistical-trust-layer"
+version = "0.1.0"
+description = "An agent that reads DataHub via MCP, runs statistical data-health + honest-metrics audits, and writes verdicts back to the graph."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = [
+    # DataHub: metadata graph read/write + local ingestion
+    "acryl-datahub>=0.15.0",
+    # stats for the honest-metrics moat (no heavy ML deps on purpose)
+    "numpy>=1.26",
+    "scipy>=1.11",
+    # cli + config
+    "typer>=0.12",
+    "python-dotenv>=1.0",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+trust-layer = "trust_layer.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# NOTE: The DataHub MCP server itself is run separately via `uvx mcp-server-datahub@latest`
+# (see scripts/quickstart_up.sh). This project is the AGENT that consumes it + the
+# DataHub Python SDK for richer write-backs (assertions/incidents).
