@@ -31,7 +31,7 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
   skill olarak kurulabilir + submit edilebilir.
 - **Governed verdict:** opt-in `propose_deprecation` — AUDIT FAILED'de deprecation ÖNERİR
   (deprecated=false + not), insan onaylar. Governance modeline saygı.
-- 48/48 test + verify_all 16/16 yeşil.
+- 51/51 test + verify_all 16/16 yeşil.
 
 ## Future work (docs/PLAN.md)
 - DataHub Cloud'un formal proposals API'siyle deprecation önerisini gerçek proposal olarak sun.

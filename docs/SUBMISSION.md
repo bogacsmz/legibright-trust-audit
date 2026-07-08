@@ -51,7 +51,7 @@ graph. Built on the **Agent Context Kit**; extends the canonical **Data Quality 
 `.claude-plugin/`. Verified write→read-back on DataHub 1.6.
 
 **2 · Technical Execution — tested and reproducible.**
-48/48 unit tests + a 16/16 adversarial regression suite (`scripts/verify_all.py`). Write-back is
+51/51 unit tests + a 16/16 adversarial regression suite (`scripts/verify_all.py`). Write-back is
 **idempotent** (deterministic entity keys → re-runs update, never duplicate) with incident lifecycle
 (resolves on FAIL→OK) and best-effort transactionality. Scales: on 250k rows, distribution-drift 1.1s,
 calibration 0.14s, target-leakage 3s, peak RSS ~323 MB. *Evidence:* `tests/`, `docs/VERIFICATION.md`.
@@ -97,8 +97,8 @@ bash demo/run_demo.sh                # full demo (needs DataHub quickstart up)
 The auto-fed verdict covers split leakage; target/group/calibration checks are opt-in (need the
 caller's features). Calibration has a ~5% nominal false-positive rate by construction. `schema_drift`
 partially overlaps DataHub's native schema history (disclosed). Full ledger:
-**[`docs/VERIFICATION.md`](VERIFICATION.md)** — 12 flaws found+fixed across a 3-round self-audit, 6
-limits documented, nothing loosened to go green.
+**[`docs/VERIFICATION.md`](VERIFICATION.md)** — 13 flaws found+fixed (12 in a 3-round self-audit + 1
+during demo prep), 6 limits documented, nothing loosened to go green.
 
 ## Built with
 DataHub **Agent Context Kit** · **MCP** (FastMCP) · **DataHub Skills** · `acryl-datahub` (SDK 1.6) ·

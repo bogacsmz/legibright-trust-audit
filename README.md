@@ -144,4 +144,4 @@ python scripts/verify_all.py     # 16 adversarial regression checks (no DataHub 
 
 ## Status
 M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ · auto-fed + MCP ✅ · Sentinel suite ✅ ·
-OSS skill ✅ · 3-round self-audit ✅ (43 tests + 16 verify_all checks green). See `docs/PLAN.md`.
+OSS skill ✅ · 3-round self-audit ✅ (51 tests + 16 verify_all checks green). See `docs/PLAN.md`.

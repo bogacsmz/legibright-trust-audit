@@ -11,7 +11,7 @@ the verdicts in DataHub. Verified live on 8 Jul 2026.
 | Dataset (public, non-betting) | What we did | Auditor verdict | Correct? |
 |---|---|---|---|
 | **UCI Bike Sharing** (731 daily records, 2011-12) | Honest **walk-forward** forecast: Ridge, time-ordered split. R²_in=0.79, R²_holdout=0.57 | 🟢 **TRUSTWORTHY** — clean split, model generalizes (no false alarm) | ✅ |
-| **Kaggle Titanic** (891 rows) | **Overfit** unpruned tree + **random split** (injected leakage). acc_in=0.99, acc_holdout=0.74 | 🔴 **NOT TRUSTWORTHY** — temporal leakage + overfit + calibration (ECE 0.26) | ✅ |
+| **Kaggle Titanic** (891 rows) | **Overfit** unpruned tree + **random split** (injected leakage). acc_in=0.99, acc_holdout=0.74 | 🔴 **NOT TRUSTWORTHY** — temporal leakage + overfit (calibration ⚠️ *not certifiable* — HL degenerate on the tree's hard 0/1 predictions, ECE 0.25) | ✅ |
 
 Both verdicts were written back into DataHub (assertions + incident + tags) and read back:
 - `main.bikeshare` → tags `[]` (clean; a stale tag from an earlier run was reconciled away).
