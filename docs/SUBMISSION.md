@@ -65,7 +65,7 @@ DataHub Skill; built on DataHub's MCP Server + Skills, extends the Data Quality 
 
 **2 · Technical Execution — tested & reproducible.** 53/53 unit tests + a 16-check adversarial suite
 (15 stand-alone, +1 write-back idempotency with DataHub up); deterministic idempotent write-back;
-scales to 250k rows in <1s per check (~212 MB, reproducible via `scripts/bench_scale.py`). Judge-verified
+scales to 250k rows in <1s per check (~210–240 MB, reproducible via `scripts/bench_scale.py`). Judge-verified
 from a clean clone + fresh venv.
 → [`verify_all.py`](../scripts/verify_all.py) · [`tests/`](../tests/) · [`bench_scale.py`](../scripts/bench_scale.py) · [`VERIFICATION.md`](VERIFICATION.md)
 

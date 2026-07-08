@@ -79,8 +79,8 @@ all core verdict numbers, idempotency, the OSS PRs, MCP tool, owner/avatar, depr
 
 ## What held up under attack (genuine robustness)
 - Statistical core is **deterministic** (same input → same verdict); no unseeded RNG in the verdict path.
-- **250k synthetic rows** (reproducible: `python scripts/bench_scale.py`): distribution_drift 0.49s,
-  calibration 0.13s, target_leakage 0.59s; process peak RSS ~212 MB.
+- **250k synthetic rows** (reproducible: `python scripts/bench_scale.py`): each of distribution_drift,
+  calibration, and target_leakage runs **sub-second**; process peak RSS **~210–240 MB** (machine-dependent).
 - Random-split detection (per-row timestamps) and memorizing-model overfit: 25/25 each in adversarial trials.
 - `classify_sql` on empty/garbage/1 MB/deep-nested strings: graceful UNKNOWN, no crash.
 - A generalizing model with a real train/test gap (Bike Sharing R² 0.79→0.57) correctly PASSES — no wolf-crying.
