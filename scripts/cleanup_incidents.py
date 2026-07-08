@@ -27,12 +27,20 @@ def main() -> int:
     from datahub.metadata import schema_classes as S
 
     g = DataHubGraph(DataHubGraphConfig(server=CONFIG.gms_url, token=CONFIG.gms_token))
+
+    def _is_ours(urn: str) -> bool:
+        # only delete incidents Legibright authored — never a human- or other-tool-filed incident
+        info = g.get_aspect(urn, S.IncidentInfoClass)
+        return bool(info and (getattr(info, "customType", "") == "honest-metrics-audit"
+                              or (info.title or "").startswith("[trust-layer]")))
+
     total = 0
     for ds in DATASETS:
         incs = list(g.get_related_entities(ds, ["IncidentOn"], RelationshipDirection.INCOMING))
-        for r in incs:
+        ours = [r for r in incs if _is_ours(r.urn)]
+        for r in ours:
             g.hard_delete_entity(r.urn)
-        total += len(incs)
+        total += len(ours)
         # strip stale tags
         tags = g.get_aspect(ds, S.GlobalTagsClass)
         stripped = 0
@@ -41,7 +49,7 @@ def main() -> int:
             stripped = len(tags.tags) - len(keep)
             if stripped:
                 g.emit_mcp(MCP(entityUrn=ds, aspect=S.GlobalTagsClass(tags=keep)))
-        print(f"  {ds.split(',')[1]:15s} deleted {len(incs)} incidents"
+        print(f"  {ds.split(',')[1]:15s} deleted {len(ours)}/{len(incs)} incidents (trust-layer only)"
               + (f", stripped {stripped} stale tag(s)" if stripped else ""))
     print(f"\n✓ removed {total} incident entities. Now run: bash demo/run_demo.sh")
     return 0

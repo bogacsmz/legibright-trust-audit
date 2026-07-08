@@ -22,6 +22,7 @@ class AuditReport:
     target: str
     findings: list[Finding] = field(default_factory=list)
     verdict: Verdict = Verdict.TRUSTWORTHY
+    writeback_errors: list[str] = field(default_factory=list)  # partial-write failures, if any
 
     def trust_score(self) -> int:
         """0-100 statistical-honesty score, banded to the verdict:
@@ -120,7 +121,8 @@ class TrustLayerAgent:
             reason = next((f.headline for f in report.findings if f.failed), "failed trust audit")
             _try("deprecation-proposal", lambda: self.client.propose_deprecation(urn, reason))
 
-        if errors:  # surface partial-write inconsistency instead of hiding it
+        if errors:  # surface partial-write inconsistency instead of hiding it — on the report
+            report.writeback_errors = errors  # programmatic callers can detect partial failure
             print(f"[write-back] {len(written)} ok, {len(errors)} FAILED: " + "; ".join(errors))
         return written
 

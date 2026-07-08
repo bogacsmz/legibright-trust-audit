@@ -8,8 +8,8 @@
 
 > *Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.*
 >
-> 🔍 **14 bugs found in ourselves — and fixed** across a 3-round adversarial self-audit + demo/UI hardening,
-> nothing loosened to go green. The one honesty tool that survives its own honesty test → [`docs/VERIFICATION.md`](VERIFICATION.md).
+> 🔍 **15 bugs found in ourselves — and fixed** across a 3-round adversarial self-audit + demo/UI hardening
+> + a fresh delta audit, nothing loosened to go green. The one honesty tool that survives its own honesty test → [`docs/VERIFICATION.md`](VERIFICATION.md).
 
 ## Elevator pitch
 AI agents now write the SQL, build the pipeline, and train the model — but nobody audits whether
@@ -60,13 +60,14 @@ Then it proves it doesn't cry wolf: an honest model (Bike Sharing) passes 🟢 *
 
 **1 · Use of DataHub — deep, native, write-back.** Reads over MCP and *writes back* native Assertion +
 Incident + Tag + Trust Score property + a deprecation proposal + agent avatar; installs as the 6th
-DataHub Skill; built on the Agent Context Kit, extends the Data Quality Agent pattern.
+DataHub Skill; built on DataHub's MCP Server + Skills, extends the Data Quality Agent pattern.
 → [`writeback.py`](../src/trust_layer/writeback.py) · [`datahub_client.py`](../src/trust_layer/datahub_client.py) · [`skills/`](../skills/datahub-trust-audit/) · [`.claude-plugin/`](../.claude-plugin/)
 
-**2 · Technical Execution — tested & reproducible.** 52/52 unit tests + a 16-check adversarial suite
+**2 · Technical Execution — tested & reproducible.** 53/53 unit tests + a 16-check adversarial suite
 (15 stand-alone, +1 write-back idempotency with DataHub up); deterministic idempotent write-back;
-scales to 250k rows in seconds (~323 MB). Judge-verified from a clean clone + fresh venv.
-→ [`verify_all.py`](../scripts/verify_all.py) · [`tests/`](../tests/) · [`VERIFICATION.md`](VERIFICATION.md)
+scales to 250k rows in <1s per check (~212 MB, reproducible via `scripts/bench_scale.py`). Judge-verified
+from a clean clone + fresh venv.
+→ [`verify_all.py`](../scripts/verify_all.py) · [`tests/`](../tests/) · [`bench_scale.py`](../scripts/bench_scale.py) · [`VERIFICATION.md`](VERIFICATION.md)
 
 **3 · Originality — the layer DataHub doesn't ship.** Statistical honesty: temporal leakage (sqlglot),
 target/group leakage, overfit collapse, sample-size-aware Hosmer–Lemeshow calibration. Extend, not rewrite.
@@ -87,7 +88,7 @@ need (TruEra→Snowflake, Robust Intelligence→Cisco, 2024); Legibright puts it
 ## Why we're different (one line)
 **We're not another text-to-SQL agent. We audit whether the number an agent produced is honest —
 the thing DataHub doesn't do — write the verdict back into the graph, and prove it by surviving our
-own 3-round adversarial audit (14 bugs found in ourselves, fixed).**
+own 3-round adversarial audit + delta pass (15 bugs found in ourselves, fixed).**
 
 ## Open-source contributions (contribute back)
 Two prepared PRs — clickable "contribute back" evidence (the rules count RFCs, docs, and skills):
@@ -114,11 +115,11 @@ bash demo/run_demo.sh                # full demo (DataHub quickstart up) → ver
 The auto-fed verdict covers split leakage; target/group/calibration checks are opt-in (need the
 caller's features). Calibration has a ~5% nominal false-positive rate by construction. `schema_drift`
 partially overlaps DataHub's native schema history (disclosed). Full ledger:
-**[`docs/VERIFICATION.md`](VERIFICATION.md)** — 14 flaws found+fixed (12 in a 3-round self-audit + 2
-while hardening the demo/UI), 6 limits documented, nothing loosened to go green.
+**[`docs/VERIFICATION.md`](VERIFICATION.md)** — 15 flaws found+fixed (12 in a 3-round self-audit + 3
+while hardening the demo/UI and in a fresh delta audit), 6 limits documented, nothing loosened to go green.
 
 ## Built with
-DataHub **Agent Context Kit** · **MCP** (FastMCP) · **DataHub Skills** · `acryl-datahub` (SDK 1.6) ·
+DataHub **MCP Server** (FastMCP) · **DataHub Skills** · `acryl-datahub` (SDK 1.6) ·
 `sqlglot` · `numpy`/`scipy` · Python 3.
 
 ## Links

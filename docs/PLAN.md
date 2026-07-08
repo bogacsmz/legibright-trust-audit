@@ -11,7 +11,7 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
 3. **Real-World Usefulness:** README pratisyen-acısı cümlesiyle açılıyor; örnek = gerçek veride sahte edge.
 4. **OSS bonus:** Auditor registry-paketli (`honest_metrics/registry.py`); plan `docs/OSS_CONTRIBUTION.md`.
 5. **Submission Quality:** `demo/scenario.md` 3-dk akış hazır; README kurulum adımları net.
-6. **Technical Execution:** 25/25 test, canlı uçtan-uca çalışıyor.
+6. **Technical Execution:** 53/53 test, canlı uçtan-uca çalışıyor.
 
 ## Faz 0 — Scaffold (8 Tem) ✅ TAMAM
 - Repo, Apache-2.0, pyproject, MCP/SDK katmanı. Statistical core gerçek+test edilmiş.
@@ -31,7 +31,7 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
   skill olarak kurulabilir + submit edilebilir.
 - **Governed verdict:** opt-in `propose_deprecation` — AUDIT FAILED'de deprecation ÖNERİR
   (deprecated=false + not), insan onaylar. Governance modeline saygı.
-- 52/52 test + verify_all 16/16 yeşil (15 stand-alone / 16 DataHub'lı).
+- 53/53 test + verify_all 16/16 yeşil (15 stand-alone / 16 DataHub'lı).
 
 ## Future work (docs/PLAN.md)
 - DataHub Cloud'un formal proposals API'siyle deprecation önerisini gerçek proposal olarak sun.
@@ -45,7 +45,7 @@ Kategori: *Agents That Do Real Work*. Proje: hibrit Statistical Trust Layer (Sen
   schema-drift, hepsi "extend" konumunda (DataHub profile/schema okur, üstüne katar).
   `sentinel_scan.py` gerçek DataHub şeması + gerçek oran verisinde çalışıyor. Sentinel registry.
 - **Sıradaki:** Auditor+Sentinel'i DataHub Skill olarak paketle (OSS bonus, `docs/OSS_CONTRIBUTION.md`).
-- Kabul: gerçek veride sahte-edge'i + veri-sağlığı sorunlarını canlı yakalıyor ✅. 25/25 test.
+- Kabul: gerçek veride sahte-edge'i + veri-sağlığı sorunlarını canlı yakalıyor ✅. 53/53 test.
 
 ## Faz 3 — Demo + cila (23–31 Tem)
 - Demo ortamını kur (seed script: donmuş feed + sahte +40% ROI metriği + temiz kontrol metrik).

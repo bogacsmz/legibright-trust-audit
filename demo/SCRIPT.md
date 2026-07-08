@@ -45,16 +45,16 @@ semantic (🟢🟡🔴). Watermark `legibright-mark.svg` bottom-right throughout
 - `Writes native entities: Assertion · Incident · Tag · Structured Property`
 - `Extends the Data Quality Agent pattern — not a rewrite.`
 
-**VO:** "This isn't a toy script. It's an MCP tool any agent can call, and it installs as a sixth DataHub Skill next to the official five. It's built on DataHub's Agent Context Kit and extends the canonical Data Quality Agent pattern — adding the statistical-honesty layer DataHub doesn't ship. We compose search and quality; we don't rebuild them."
+**VO:** "This isn't a toy script. It's an MCP tool any agent can call, and it installs as a sixth DataHub Skill next to the official five. It's built on DataHub's MCP Server and Skills and extends the canonical Data Quality Agent pattern — adding the statistical-honesty layer DataHub doesn't ship. We compose search and quality; we don't rebuild them."
 
 ### 2:25–2:52 · MIC-DROP — it survives its own audit  *(terminal `verify_all.py`)*
 **ON-SCREEN:**
 - `A tool that audits others' honesty must survive the same cruelty.`
 - `3-round adversarial self-audit — a separate agent tried to break it.`
-- `Nothing loosened to pass. 14 real flaws found + fixed · 6 honest limits documented.`
-- `52/52 tests · verify_all 16/16 · run it yourself.`
+- `Nothing loosened to pass. 15 real flaws found + fixed · 6 honest limits documented.`
+- `53/53 tests · verify_all 16/16 · run it yourself.`
 
-**VO:** "A tool that judges other people's honesty has to survive the same cruelty. So a separate agent spent three rounds trying to break this one — and nothing was ever loosened to go green. Fourteen real flaws found and fixed — including two I caught while building this very demo — six honest limits documented in the open. Fifty-two tests, sixteen adversarial checks. Don't trust me — run verify_all yourself."
+**VO:** "A tool that judges other people's honesty has to survive the same cruelty. So a separate agent spent three rounds trying to break this one — and nothing was ever loosened to go green. Fifteen real flaws found and fixed — including three I caught while building and re-verifying this very demo — six honest limits documented in the open. Fifty-three tests, sixteen adversarial checks. Don't trust me — run verify_all yourself."
 
 ### 2:52–3:00 · CLOSE  *(close card)*
 **ON-SCREEN:** ✓-L logo · **Legibright — make model trust legible.** · `github.com/bogacsmz/legibright-trust-audit`

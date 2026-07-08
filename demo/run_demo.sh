@@ -47,7 +47,7 @@ $PY scripts/generality_check.py
 pause
 
 banner "BEAT 3 · the trust tool survives its OWN audit"
-echo "   3-round adversarial self-audit + demo/UI hardening → 14 real flaws fixed, 6 honest limits documented."
+echo "   3-round adversarial self-audit + demo/UI hardening + delta audit → 15 real flaws fixed, 6 honest limits documented."
 echo "   Nothing was loosened to go green. Run it yourself:"
 echo
 $PY -m pytest tests/ -q | tail -1

@@ -8,7 +8,7 @@
   <i>Every other agent produces answers. Legibright tells you which to trust — and it starts by not trusting itself.</i>
 </p>
 <p align="center">
-  🔍 <b>14 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo/UI hardening → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
+  🔍 <b>15 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo/UI hardening + a fresh delta audit → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
 </p>
 
 # Statistical Trust Layer — an autonomous DataHub agent that audits whether a model can be trusted
@@ -79,7 +79,8 @@ what DataHub already knows and adds the temporal/baseline layer it doesn't ship)
 Sentinel guards the *source*; the Auditor judges the *metric* built on it.
 
 ## Why this isn't just another AI+MCP agent
-The moat is domain honesty. The reproducible demo runs on **~12,900 real matches** of public
+The moat is domain honesty. The reproducible demo audits **11,849 real matches** (the complete-odds
+subset of a 12,904-row public dataset) of
 football closing odds (Pinnacle + bookmakers, football-data.co.uk) that `fetch_data.py` downloads
 for you — the Auditor catches a fake +40% ROI edge live and you watch the AUDIT FAILED verdict
 appear in the DataHub UI. The protocol itself was distilled from the author's larger private
@@ -141,7 +142,7 @@ python scripts/demo_writeback.py # Auditor on real matches → live 🔴 verdict
 python scripts/generality_check.py  # proof on Bike Sharing + Titanic (non-betting)
 python scripts/seed_queries.py leaky && python scripts/audit_auto.py  # auto-fed from query history
 
-pip install -e '.[dev]' && pytest -q                # run the test suite (25 tests)
+pip install -e '.[dev]' && pytest -q                # run the test suite (53 tests)
 ```
 MCP wiring for judges (drive it from Claude/Cursor): `scripts/mcp_config.json`.
 Env: `datahub ingest` reads `MATCHES_DB` / `DATAHUB_GMS_URL` (both default sensibly; see `.env.example`).
@@ -171,4 +172,4 @@ python scripts/verify_all.py     # 15 checks stand-alone (no DataHub); 16 with t
 
 ## Status
 M0 scaffold ✅ · M1 live read ✅ · M2 write-back ✅ · auto-fed + MCP ✅ · Sentinel suite ✅ ·
-OSS skill ✅ · self-audit ✅ (52 tests + verify_all 15 stand-alone / 16 with DataHub, green). See `docs/PLAN.md`.
+OSS skill ✅ · self-audit ✅ (53 tests + verify_all 15 stand-alone / 16 with DataHub, green). See `docs/PLAN.md`.

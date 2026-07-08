@@ -52,8 +52,8 @@ class OverfitFlagsCheck(Check):
                 # a large train→holdout collapse is overfit at ANY in-sample level
                 # (catches 0.93→0.40 and 0.95→0.10, not just near-perfect memorization)
                 fail = True
-                flags.append(f"holdout collapse: {metric} {in_sample:.2f}→{holdout:.2f} "
-                             f"(gap {gap:+.2f} > {_COLLAPSE_GAP})")
+                flags.append(f"holdout collapse: {metric} {in_sample:.3f}→{holdout:.3f} "
+                             f"(gap {gap:+.3f} > {_COLLAPSE_GAP})")
             elif in_sample >= _NEAR_PERFECT:
                 fail = True
                 flags.append(f"near-perfect in-sample {metric} {in_sample:.2f} with "

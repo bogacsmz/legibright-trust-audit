@@ -73,3 +73,15 @@ def test_calibration_degenerate_hard_predictions_not_green():
     f = CalibrationBiasCheck().run(pred, y)
     assert f.severity is Severity.WARN
     assert f.metrics["ece"] >= 0.03 and f.metrics["hl_bins_used"] < 2
+
+
+def test_calibration_partial_degenerate_not_green():
+    # soft-honest on some rows, confidently-WRONG hard 0/1 on others: the hard bins drop out of
+    # χ² (p looks fine) but their error still counts toward ECE. Must be WARN "not certifiable",
+    # never a green OK — this is the partial-degenerate residual of the earlier full-degenerate fix.
+    pred = [0.0] * 30 + [1.0] * 30 + [0.5] * 40
+    y = [1] * 30 + [0] * 30 + [1, 0] * 20            # hard bins inverted; soft bin balanced
+    f = CalibrationBiasCheck().run(pred, y)
+    assert f.severity is Severity.WARN                # not OK
+    assert f.metrics["ece"] >= 0.03
+    assert f.metrics["hl_bins_used"] < 10             # some bins were dropped as degenerate

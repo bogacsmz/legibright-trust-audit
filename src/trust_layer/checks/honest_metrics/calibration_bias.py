@@ -49,21 +49,25 @@ class CalibrationBiasCheck(Check):
         hl, p, ece, rows, used = _hosmer_lemeshow(bins, n)
         detail = f"HL χ²={hl:.1f}, p={p:.3g}, ECE={ece:.3f} over {len(bins)} bins"
 
-        if used < 2:
-            # HL is UNDEFINED: predictions are degenerate (e.g., hard 0/1 from an overfit tree),
-            # so every bin has E∈{0,ng}, denom=0, χ²=0 and p=1. That p is NOT evidence of good
-            # calibration — fall back to the observed ECE so a badly-calibrated hard classifier
-            # can't earn a green pass on a test that couldn't run.
+        if used < len(bins):
+            # HL is COMPROMISED: one or more bins are degenerate (hard 0/1 predictions → E∈{0,ng},
+            # denom=0) and were dropped from χ². The resulting p understates miscalibration because
+            # the badly-calibrated hard bins didn't count — yet they DO count toward ECE. So a model
+            # that is soft-and-honest on some rows but confidently-wrong 0/1 on others would reach a
+            # high p and slip through the OK branch. Fall back to the observed ECE: any dropped bin +
+            # material ECE ⇒ NOT certifiable (never OK). Immaterial ECE (the dropped bins were
+            # actually correct, contributing ~0 error) still passes.
             if ece >= ece_material:
                 return Finding(self.id, Severity.WARN,
-                               f"calibration NOT certifiable — HL degenerate (predictions look "
-                               f"non-probabilistic), observed ECE {ece:.3f} ≥ {ece_material}",
+                               f"calibration NOT certifiable — HL compromised "
+                               f"({len(bins) - used}/{len(bins)} bins non-probabilistic), "
+                               f"observed ECE {ece:.3f} ≥ {ece_material}",
                                detail=detail,
                                metrics={"hl": hl, "p": p, "ece": ece, "hl_bins_used": used},
                                suggested_tags=["audit-warn"])
             return Finding(self.id, Severity.OK,
-                           f"well calibrated — ECE {ece:.3f} immaterial (HL degenerate: "
-                           f"non-probabilistic predictions)",
+                           f"well calibrated — ECE {ece:.3f} immaterial "
+                           f"({len(bins) - used}/{len(bins)} bins degenerate but low-error)",
                            detail=detail, metrics={"hl": hl, "p": p, "ece": ece, "hl_bins_used": used})
 
         if p < p_fail and ece >= ece_material:
