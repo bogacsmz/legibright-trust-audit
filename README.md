@@ -11,6 +11,8 @@
   🔍 <b>15 bugs found in ourselves — and fixed.</b> A 3-round adversarial self-audit + demo/UI hardening + a fresh delta audit → <a href="docs/VERIFICATION.md">VERIFICATION.md</a>
 </p>
 
+<p align="center"><img src="docs/assets/catch.gif" width="760" alt="Legibright catches an overfit revenue model — Trust Score 28/100"/></p>
+
 # Statistical Trust Layer — an autonomous DataHub agent that audits whether a model can be trusted
 
 > **Build with DataHub: The Agent Hackathon** · Category: **Agents That Do Real Work** · Apache-2.0 · Deadline 10 Aug 2026.
