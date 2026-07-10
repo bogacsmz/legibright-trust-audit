@@ -86,11 +86,12 @@ Sentinel guards the *source*; the Auditor judges the *metric* built on it.
 The moat is domain honesty. The reproducible hero demo audits a **revenue forecaster on 604 days of
 real e-commerce sales** (UCI Online Retail II, 2009–2011, downloaded by `fetch_data.py`): a model
 built the standard naive way — a default `DecisionTreeRegressor` and sklearn's default random
-`train_test_split` — scores a perfect **R² 1.00** in training, but Legibright measures that **100% of
-the training rows are dated after the test window** (a random split on a time series) and the model
-collapses to **R² −0.05 on unseen days**, worse than guessing the average. You watch the 🔴 NOT
-TRUSTWORTHY verdict (Trust Score 28/100) land in the DataHub UI, live. Every number is measured from
-that real model — nothing is reconstructed.
+`train_test_split` — scores a perfect **R² 1.00** in training but collapses to **R² −0.05 on genuinely
+unseen days**, worse than guessing the average. Legibright names the cause: the split was random, not
+chronological, so the model trained on days from inside the test period — every training row is dated
+at or after the test set begins, the fingerprint of a random split masquerading as walk-forward. You
+watch the 🔴 NOT TRUSTWORTHY verdict (Trust Score 28/100) land in the DataHub UI, live. Every number is
+measured from that real model — nothing is reconstructed.
 
 It also runs on the author's own **real, self-collected football-odds data** (`main.matches`, 11,849
 public matches) — auto-fed from DataHub query history with no hand-supplied split (see below) — and on

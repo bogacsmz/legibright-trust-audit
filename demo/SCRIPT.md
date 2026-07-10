@@ -26,8 +26,8 @@ Verdict colors stay as-is on screen (🟢🟡🔴); title/transition cards are i
 
 ## Scene 2 — The Catch (0:15–1:00)
 [SCREEN: Terminal running `demo/run_demo.sh`, Beat 1 (`demo_revenue.py`) — let the verdict card print live, then cut to the DataHub UI on `main.revenue` (Incidents + Quality tabs)]
-[ON-SCREEN TEXT: "604 days of real e-commerce revenue. A revenue forecaster scores R² 1.00 — 'explains 100% of the variance.' But 100% of the training data is from AFTER the test period. Trust Score: 28/100 → incident + tag + deprecation proposal, written into DataHub."]
-[VOICEOVER: "Here is real data: two years of daily sales from an online store. Someone builds a revenue forecaster the standard way — a default model, the default random train-test split. On paper it looks perfect: it explains one hundred percent of the variance. Legibright checks it. It finds that one hundred percent of the training data came from AFTER the test window. The split was random, so the model was trained on the future. On genuinely unseen days, it does worse than guessing the average. Legibright gives it a Trust Score: twenty-eight out of one hundred. Not trustworthy. And it writes this straight into DataHub: an incident, a tag, the score, and a note saying 'maybe retire this model.'"]
+[ON-SCREEN TEXT: "604 days of real e-commerce revenue. A revenue forecaster scores R² 1.00 in training — but R² −0.05 on genuinely unseen days: worse than guessing the average. The tell: a random, non-chronological split. Trust Score: 28/100 → incident + tag + deprecation proposal, written into DataHub."]
+[VOICEOVER: "Here is real data: two years of daily sales from an online store. Someone builds a revenue forecaster the standard way — a default model, the default random train-test split. On paper it looks perfect: R-squared one-point-zero-zero — it explains all the variance in training. But Legibright checks it on genuinely unseen days, and it scores worse than just guessing the average. Here is why: the split was random, not chronological, so the model got to train on days from inside the test period — the fingerprint of a random split dressed up as a real forecast. Legibright gives it a Trust Score: twenty-eight out of one hundred. Not trustworthy. And it writes this straight into DataHub: an incident, a tag, the score, and a note saying 'maybe retire this model.'"]
 
 ## Scene 3 — Trust, Not Accuracy (1:00–1:35)
 [SCREEN: Transition card `demo/cards/transition-trust-accuracy.png` (1–2 sec), then terminal Beat 2 (`generality_check.py`) showing Bike Sharing pass, then Titanic fail]
@@ -60,5 +60,6 @@ Verdict colors stay as-is on screen (🟢🟡🔴); title/transition cards are i
 - Honesty guardrail for narration: say "checks" or "finds," not "proves." Every number in the
   hero beat is MEASURED live — a real default `DecisionTreeRegressor` on real Online Retail II
   revenue, split with sklearn's default random `train_test_split`. Nothing is reconstructed: the
-  R² 1.00 → −0.05 collapse and the 100% leak are what that naive-but-typical pipeline actually produces.
+  R² 1.00 → −0.05 collapse and the random-split leak signature are what that naive-but-typical pipeline
+  actually produces. Lead with the collapse (bulletproof); the leak is the *why*, not "100% after the test period."
 - Full step-by-step walkthrough (what to click, how long to hold each screen): `demo/RECORDING_GUIDE.md`.

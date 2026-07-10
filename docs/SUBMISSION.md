@@ -45,10 +45,11 @@ overfit curve that evaporates in production. Generic AI agents happily ship all 
 On `main.revenue` — 604 days of real e-commerce revenue (UCI Online Retail II, CC BY 4.0,
 reproducible) — it audits a revenue forecaster built the standard naive way (a default
 `DecisionTreeRegressor`, sklearn's default random `train_test_split`) and, in one run:
-- **Measures temporal leakage:** 100% of training rows are dated after the test window — a random
-  split on a time series, not a time cut. The model was trained on the future. 🔴
-- **Flags the overfit signature:** a perfect **R² 1.00** in training collapses to **R² −0.05** on
-  unseen days (gap 1.05) — worse than predicting the average. 🔴
+- **Flags the overfit signature (the bulletproof tell):** a perfect **R² 1.00** in training collapses
+  to **R² −0.05** on genuinely unseen days (gap 1.05) — worse than predicting the average. 🔴
+- **Names the cause — a leaky split:** the split was random, not chronological, so the model trained
+  on days from inside the test period; every training row is dated at or after the test set begins —
+  the fingerprint of a random split masquerading as walk-forward. 🔴
 - **Verdict: NOT TRUSTWORTHY, Trust Score 28/100** — written back as 2 assertions, 1 ACTIVE incident,
   tags, a typed Trust Score property, and a **deprecation proposal** (agent proposes, human approves).
 
