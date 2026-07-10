@@ -42,24 +42,26 @@ and money die: a random train/test split masquerading as walk-forward, a leaked 
 overfit curve that evaporates in production. Generic AI agents happily ship all three.
 
 ## What Legibright does (live, on real data)
-On `main.matches` — 11,849 real football matches (public football-data.co.uk, reproducible) — it
-audits a logged `backtest_roi = +40%` claim and, in one run:
-- **Measures temporal leakage:** 99.8% of training rows are dated after the earliest test match — a
-  random split, not a time cut. 🔴
-- **Flags the overfit signature:** +40% in-sample vs −12% holdout (gap 0.52); 677 combos scanned →
-  ~16 false winners expected by chance. 🔴
-- **Passes calibration:** it does *not* flag what's genuinely fine. ✅
-- **Verdict: NOT TRUSTWORTHY, Trust Score 28/100** — written back as 3 assertions, 1 ACTIVE incident,
+On `main.revenue` — 604 days of real e-commerce revenue (UCI Online Retail II, CC BY 4.0,
+reproducible) — it audits a revenue forecaster built the standard naive way (a default
+`DecisionTreeRegressor`, sklearn's default random `train_test_split`) and, in one run:
+- **Measures temporal leakage:** 100% of training rows are dated after the test window — a random
+  split on a time series, not a time cut. The model was trained on the future. 🔴
+- **Flags the overfit signature:** a perfect **R² 1.00** in training collapses to **R² −0.05** on
+  unseen days (gap 1.05) — worse than predicting the average. 🔴
+- **Verdict: NOT TRUSTWORTHY, Trust Score 28/100** — written back as 2 assertions, 1 ACTIVE incident,
   tags, a typed Trust Score property, and a **deprecation proposal** (agent proposes, human approves).
 
-Then it proves it doesn't cry wolf: an honest model (Bike Sharing) passes 🟢 **100/100**, a leaky one
-(Titanic) fails 🔴 — on public datasets unrelated to betting.
+Every number is measured from that real model — nothing reconstructed. Then it proves it doesn't cry
+wolf: an honest model (Bike Sharing) passes 🟢 **100/100**, a leaky one (Titanic) fails 🔴. It also
+runs on the author's own real, self-collected football-odds data (`main.matches`, 11,849 public
+matches), auto-fed from DataHub query history.
 
 > ### Trust ≠ accuracy
 > Legibright scores **honesty, not performance**. A bike-demand model that's only ~57% accurate but
-> *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a leaky "+40% ROI winner" earns
-> **28**. It rewards the modest-but-honest number and punishes the impressive lie — the opposite of
-> what an accuracy dashboard does.
+> *honestly* 57% (clean split, no overfit) earns **Trust Score 100**; a "perfect" revenue forecaster
+> that scores **R² 1.00** on a leaked random split earns **28**. It rewards the modest-but-honest
+> number and punishes the impressive lie — the opposite of what an accuracy dashboard does.
 
 ---
 

@@ -20,7 +20,7 @@ scene numbers, same numbers, same words. `SCRIPT.md` is what you *read*; this is
    ```
    Wait for `READY TO RECORD` at the end. If it prints `NOT CLEAN`, read the mismatch line and
    run it again — don't record until you see `READY TO RECORD`.
-5. **Pre-navigate the browser tab** to `http://localhost:9002/dataset/urn:li:dataset:(urn:li:dataPlatform:sqlite,main.matches,PROD)/Incidents`
+5. **Pre-navigate the browser tab** to `http://localhost:9002/dataset/urn:li:dataset:(urn:li:dataPlatform:sqlite,main.revenue,PROD)/Incidents`
    so it's one click away from Scene 2 — but don't switch to it until the script tells you to.
 6. Have `demo/cards/title-open.png`, `transition-trust-accuracy.png`, `transition-self-audit.png`,
    and `title-close.png` open in Preview (or already imported into your editor timeline) so you can
@@ -52,11 +52,11 @@ scene numbers, same numbers, same words. `SCRIPT.md` is what you *read*; this is
   DEMO_PAUSE=1 bash demo/run_demo.sh
   ```
   Let it print the intro banner and the avatar line, then press Enter once to reach **BEAT 1**.
-- The verdict card prints live (temporal_leakage ❌, overfit_flags ❌, calibration_bias ✅, Trust
-  Score 28/100). **Start reading the Scene 2 VOICEOVER as soon as the card starts printing** — your
+- The verdict card prints live (temporal_leakage ❌, overfit_flags ❌, Trust Score 28/100 — the
+  revenue forecaster that scored R² 1.00 in training). **Start reading the Scene 2 VOICEOVER as soon as the card starts printing** — your
   words and the numbers appearing on screen should land close together.
 - When the card finishes printing and the "writing verdict back into DataHub" lines appear, **cut
-  to the pre-navigated browser tab** (`main.matches` → Incidents). Let it sit for 3–4 seconds so
+  to the pre-navigated browser tab** (`main.revenue` → Incidents). Let it sit for 3–4 seconds so
   the viewer can read the red incident row and the Trust Score.
 - Don't press Enter to continue yet — pause the terminal here, you'll come back to it in Scene 5.
 
@@ -70,7 +70,7 @@ scene numbers, same numbers, same words. `SCRIPT.md` is what you *read*; this is
 ### Scene 4 — Real DataHub, Any Agent · 1:35–2:00
 - **Open** `skills/datahub-trust-audit/SKILL.md` in your editor (VS Code, or `cat` it in a second
   terminal tab) — just 2–3 seconds, enough to show it's a real file with real frontmatter.
-- **Cut back to the browser tab**, `main.matches` → **Quality** tab this time (3 FAIL assertions)
+- **Cut back to the browser tab**, `main.revenue` → **Quality** tab this time (2 FAIL assertions)
   — then the **Properties** tab showing the Trust Score row.
 - **Read the Scene 4 VOICEOVER** over this — it's short, keep the cuts moving.
 
@@ -94,7 +94,7 @@ match. Don't re-record a single scene from a stale catalog state; always reset f
 ## Capture these extra moments (for the README, not the video)
 While `reset_demo.sh` / `run_demo.sh` output is still on screen, grab:
 1. **A "catalog contrast" screenshot** — the DataHub search results page (or the 3 dataset cards
-   side by side) showing `main.matches` (🔴 28), `main.titanic` (🔴 25), and `main.bikeshare`
+   side by side) showing `main.revenue` (🔴 28), `main.titanic` (🔴 25), and `main.bikeshare`
    (🟢 100) together. This one image tells the whole "it discriminates" story at a glance — great
    for the top of the README.
 2. **A ~20-second "catch loop" GIF** — screen-record just Scene 2's terminal output (the verdict

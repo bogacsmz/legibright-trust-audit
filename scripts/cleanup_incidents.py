@@ -12,9 +12,10 @@ import sys
 from trust_layer.config import CONFIG
 
 DATASETS = [
-    "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.matches,PROD)",
+    "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.revenue,PROD)",
     "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.titanic,PROD)",
     "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.bikeshare,PROD)",
+    "urn:li:dataset:(urn:li:dataPlatform:sqlite,main.matches,PROD)",
 ]
 # tags NOT owned by the auditor write-back that we still want gone from the demo assets
 STALE_TAGS = {"schema-drift"}

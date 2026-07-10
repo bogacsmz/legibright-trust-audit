@@ -16,6 +16,7 @@ export DATAHUB_GMS_URL="${DATAHUB_GMS_URL:-http://localhost:8080}"
 export DATAHUB_GMS_TOKEN="${DATAHUB_GMS_TOKEN:-}"
 export MATCHES_DB="${MATCHES_DB:-$HERE/data/matches.db}"
 export GENERALITY_DB="${GENERALITY_DB:-$HERE/data/generality.db}"
+export REVENUE_DB="${REVENUE_DB:-$HERE/data/revenue.db}"
 PY="${PY:-python3}"
 
 echo "Legibright demo reset"
@@ -36,8 +37,8 @@ echo; echo "2/4 — resetting agent profile (Legibright / Trust Auditor + avatar
 $PY scripts/set_agent_avatar.py | head -1
 
 echo; echo "3/4 — rebuilding fresh verdicts..."
-$PY scripts/demo_writeback.py >/dev/null
-echo "  matches: audited"
+$PY scripts/demo_revenue.py >/dev/null
+echo "  revenue: audited"
 $PY scripts/generality_check.py >/dev/null
 echo "  titanic + bikeshare: audited"
 
@@ -50,7 +51,7 @@ from datahub.ingestion.graph.client import DataHubGraph, DataHubGraphConfig, Rel
 from datahub.metadata import schema_classes as S
 
 g = DataHubGraph(DataHubGraphConfig(server=CONFIG.gms_url, token=CONFIG.gms_token))
-EXPECTED = {"matches": 28, "titanic": 25, "bikeshare": 100}
+EXPECTED = {"revenue": 28, "titanic": 25, "bikeshare": 100}
 ok = True
 for name, want in EXPECTED.items():
     urn = f"urn:li:dataset:(urn:li:dataPlatform:sqlite,main.{name},PROD)"

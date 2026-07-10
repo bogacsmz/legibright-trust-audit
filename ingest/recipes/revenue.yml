@@ -1,0 +1,12 @@
+# Public e-commerce revenue (UCI Online Retail II, built by scripts/fetch_data.py) → main.revenue.
+# Run: datahub ingest -c ingest/recipes/revenue.yml
+# Requires: pip install -e '.[dev]'  (installs acryl-datahub[sqlalchemy] + openpyxl for the xlsx)
+source:
+  type: sqlalchemy
+  config:
+    platform: sqlite
+    connect_uri: "sqlite:///${REVENUE_DB}"
+    profiling: {enabled: false}   # SQLite NullPool rejects profiler pool args (see docs/upstream)
+sink:
+  type: datahub-rest
+  config: {server: "${DATAHUB_GMS_URL}", token: "${DATAHUB_GMS_TOKEN}"}

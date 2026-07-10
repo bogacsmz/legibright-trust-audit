@@ -30,6 +30,7 @@ FD_SEASONS = ["2021", "2122", "2223", "2324", "2425", "2526"]
 
 TITANIC = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
 BIKE_ZIP = "https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip"
+RETAIL_ZIP = "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
 
 # football-data columns we keep (map to our `matches` schema)
 FD_COLS = {
@@ -95,6 +96,40 @@ def build_generality() -> tuple[int, int]:
     return len(t), len(b)
 
 
+def build_revenue() -> tuple[int, str]:
+    """UCI Online Retail II → daily revenue series (data/revenue.db).
+
+    Real e-commerce invoices (2009-2011, CC BY 4.0). We aggregate line revenue
+    (Quantity*Price, positive sales only) into a daily total — a clean revenue
+    time series a team would forecast. The demo then shows a naive forecaster
+    (a default tree + the default random split) silently leaking the future
+    into training. The raw .xlsx is cached in data/ so re-runs don't re-download.
+    """
+    import pandas as pd
+
+    xlsx = DATA / "online_retail_II.xlsx"
+    if not xlsx.exists():
+        z = zipfile.ZipFile(io.BytesIO(_get(RETAIL_ZIP)))
+        name = next(n for n in z.namelist() if n.endswith(".xlsx"))
+        xlsx.write_bytes(z.read(name))
+    sheets = pd.read_excel(xlsx, sheet_name=None, usecols=["Quantity", "InvoiceDate", "Price"])
+    df = pd.concat(sheets.values(), ignore_index=True)
+    df = df[(df["Quantity"] > 0) & (df["Price"] > 0)].copy()      # sales only (drop returns/cancels)
+    df["day"] = pd.to_datetime(df["InvoiceDate"]).dt.strftime("%Y-%m-%d")
+    df["rev"] = df["Quantity"] * df["Price"]
+    daily = df.groupby("day", as_index=False)["rev"].sum().sort_values("day")   # ISO day sorts chronologically
+    con = sqlite3.connect(DATA / "revenue.db")
+    con.execute("DROP TABLE IF EXISTS revenue")
+    con.execute("CREATE TABLE revenue (day TEXT, revenue REAL)")
+    con.executemany("INSERT INTO revenue VALUES (?,?)",
+                    list(daily.itertuples(index=False, name=None)))
+    con.commit()
+    n = con.execute("SELECT COUNT(*) FROM revenue").fetchone()[0]
+    span = con.execute("SELECT MIN(day), MAX(day) FROM revenue").fetchone()
+    con.close()
+    return n, f"{span[0]}..{span[1]}"
+
+
 def main() -> int:
     DATA.mkdir(exist_ok=True)
     print("Fetching public football odds (football-data.co.uk)...")
@@ -103,6 +138,9 @@ def main() -> int:
     print("Fetching Titanic + UCI Bike Sharing...")
     nt, nb = build_generality()
     print(f"  data/generality.db: titanic={nt}, bikeshare={nb}")
+    print("Fetching UCI Online Retail II (e-commerce revenue)...")
+    nr, span = build_revenue()
+    print(f"  data/revenue.db: {nr} daily revenue rows ({span})")
     print("\nDone. Next:")
     print("  python scripts/verify_all.py     # 15 adversarial checks, no DataHub needed")
     print("  bash scripts/quickstart_up.sh && bash demo/run_demo.sh   # full graph demo (needs DataHub)")
