@@ -19,3 +19,7 @@ docker-compose.override.yml
 
 # datasets (public, redistributable; kept out of git to stay light)
 data/*.csv
+
+# macOS
+.DS_Store
+**/.DS_Store
